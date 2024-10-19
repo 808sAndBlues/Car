@@ -69,6 +69,19 @@ int main(int argc, char* argv[])
 
     Logger logger(kill_flag);
 
+    if (pthread_create(&log_tid, nullptr, logger_main,
+                       &logger) == -1) {
+        std::cout << "Error creating thread\n";
+        std::perror("pthread_create");
+        std::exit(-1);
+    }
+    
+    void* ret = nullptr;
+    if (pthread_join(log_tid, &ret)) {
+        std::cout << "Error joining thread\n";
+        std::perror("pthread_join");
+        std::exit(-1);
+    }
 
     return 0;
 }

@@ -23,7 +23,10 @@ class Logger
         void log_error(char *msg);
         void log_warning(char *msg);
 
-        void main_loop(void* obj);
+        void main_loop();
 };
+
+void* logger_main(void* obj);
+
 
 #endif
