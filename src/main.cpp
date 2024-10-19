@@ -39,7 +39,6 @@ int main(int argc, char* argv[])
 
     signal.init();
 
-
     if (pthread_create(&log_tid, nullptr, logger_main,
                        &logger) == -1) {
         std::cout << "Error creating thread\n";
