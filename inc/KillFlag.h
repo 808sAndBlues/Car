@@ -16,7 +16,7 @@ class KillFlag
     public:
         void kill();
 
-        std::atomic<bool>& get_kill_flag_ref();
+        std::atomic<bool>& get_kill();
 };
 
 

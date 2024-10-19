@@ -14,10 +14,14 @@ class Logger
 {
     private:
         KillFlag& _kill_flag;
+        bool _debug = true;
         
         
     public:
-        Logger(KillFlag &kill_flag) : _kill_flag(kill_flag) {}
+        Logger(KillFlag &kill_flag, bool debug) : _kill_flag(kill_flag)
+        {
+            _debug = debug;
+        }
 
         void log_debug(char * msg);
         void log_error(char *msg);

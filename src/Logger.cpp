@@ -2,7 +2,9 @@
 
 void Logger::main_loop()
 {
-    std::cout << "I am here\n";
+    while (!_kill_flag.get_kill()) {
+                
+    }
 }
 
 

@@ -19,7 +19,7 @@ void KillFlag::kill()
     }
 }
 
-std::atomic<bool>& KillFlag::get_kill_flag_ref()
+std::atomic<bool>& KillFlag::get_kill()
 {
     return _kill_flag;
 }

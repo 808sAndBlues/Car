@@ -177,6 +177,30 @@ src/Logger.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Logger.cpp.s
 .PHONY : src/Logger.cpp.s
 
+src/Signal.o: src/Signal.cpp.o
+.PHONY : src/Signal.o
+
+# target to build an object file
+src/Signal.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Signal.cpp.o
+.PHONY : src/Signal.cpp.o
+
+src/Signal.i: src/Signal.cpp.i
+.PHONY : src/Signal.i
+
+# target to preprocess a source file
+src/Signal.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Signal.cpp.i
+.PHONY : src/Signal.cpp.i
+
+src/Signal.s: src/Signal.cpp.s
+.PHONY : src/Signal.s
+
+# target to generate assembly for a file
+src/Signal.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Signal.cpp.s
+.PHONY : src/Signal.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -216,6 +240,9 @@ help:
 	@echo "... src/Logger.o"
 	@echo "... src/Logger.i"
 	@echo "... src/Logger.s"
+	@echo "... src/Signal.o"
+	@echo "... src/Signal.i"
+	@echo "... src/Signal.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
