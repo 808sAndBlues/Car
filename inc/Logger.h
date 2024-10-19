@@ -5,27 +5,25 @@
 
 #include <pthread.h>
 #include <iostream>
-#include <atomic>
+
+#include "KillFlag.h"
 
 constexpr char* LOG_FILE = "car.log";
 
 class Logger
 {
     private:
-        std::atomic<bool>& _kill_flag;
+        KillFlag& _kill_flag;
         
-
-
+        
     public:
-        Logger(const std::atomic<bool> &kill_flag) : _kill_flag{kill_flag} {}
+        Logger(KillFlag &kill_flag) : _kill_flag(kill_flag) {}
 
         void log_debug(char * msg);
         void log_error(char *msg);
         void log_warning(char *msg);
 
         void main_loop(void* obj);
-
-        
 };
 
 #endif

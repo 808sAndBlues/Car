@@ -44,12 +44,12 @@ int main(int argc, char* argv[])
     std::int16_t c = 0;
     bool debug_mode = false;
 
-    std::atomic<bool> kill_flag(false);
+    KillFlag kill_flag;
+
 
     
     // TODO: Store pthread_t values into array for easier creation/deletion
     pthread_t log_tid = 0;
-
 
     while ((c = getopt(argc, argv, OPT_STRING)) != -1) {
         switch (c) {
@@ -67,9 +67,7 @@ int main(int argc, char* argv[])
 
     setup_sigmask();
 
-// TODO: Fix bug to pass in reference to atomic bool
-
-//    Logger logger(&kill_flag);
+    Logger logger(kill_flag);
 
 
     return 0;

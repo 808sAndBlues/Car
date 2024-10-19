@@ -129,6 +129,30 @@ Car/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/build
 .PHONY : Car/fast
 
+src/KillFlag.o: src/KillFlag.cpp.o
+.PHONY : src/KillFlag.o
+
+# target to build an object file
+src/KillFlag.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/KillFlag.cpp.o
+.PHONY : src/KillFlag.cpp.o
+
+src/KillFlag.i: src/KillFlag.cpp.i
+.PHONY : src/KillFlag.i
+
+# target to preprocess a source file
+src/KillFlag.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/KillFlag.cpp.i
+.PHONY : src/KillFlag.cpp.i
+
+src/KillFlag.s: src/KillFlag.cpp.s
+.PHONY : src/KillFlag.s
+
+# target to generate assembly for a file
+src/KillFlag.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/KillFlag.cpp.s
+.PHONY : src/KillFlag.cpp.s
+
 src/Logger.o: src/Logger.cpp.o
 .PHONY : src/Logger.o
 
@@ -186,6 +210,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Car"
+	@echo "... src/KillFlag.o"
+	@echo "... src/KillFlag.i"
+	@echo "... src/KillFlag.s"
 	@echo "... src/Logger.o"
 	@echo "... src/Logger.i"
 	@echo "... src/Logger.s"
