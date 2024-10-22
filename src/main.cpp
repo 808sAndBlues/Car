@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
 
     // TODO: Store pthread_t values into array for easier creation/deletion
     pthread_t log_tid = 0;
+    pthread_t signal_tid = 0;
 
     while ((c = getopt(argc, argv, OPT_STRING)) != -1) {
         switch (c) {
@@ -46,6 +47,13 @@ int main(int argc, char* argv[])
         std::exit(-1);
     }
     
+    if (pthread_create(&signal_tid, nullptr, signal_main_loop, &signal) == -1) {
+        std::cout << "Error creating thread for signal\n";
+        std::perror("pthread_crate\n");
+        std::exit(-1);
+    }
+
+    
     // TODO: Do I really need a ret value on this? 
     void* ret = nullptr;
     if (pthread_join(log_tid, &ret) == -1) {
@@ -54,6 +62,12 @@ int main(int argc, char* argv[])
         std::exit(-1);
     }
 
+
+    if (pthread_join(signal_tid, &ret) == -1) {
+        std::cout << "Error joining thread\n";
+        std::perror("pthread_join");
+        std::exit(-1);
+    }
 
     return 0;
 }
