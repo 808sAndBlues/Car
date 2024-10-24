@@ -5,6 +5,8 @@ project(Car)
 include_directories(${PROJECT_SOURCE_DIR}/inc
     ${PROJECT_SOURCE_DIR}/src)
 
-add_executable(Car src/main.cpp src/Logger.cpp src/KillFlag.cpp src/Signal.cpp)
+add_executable(Car 
+    src/main.cpp src/Logger.cpp src/KillFlag.cpp 
+    src/Signal.cpp src/Queue.cpp)
 
 

@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "KillFlag.h"
+#include "Queue.h"
 
 constexpr char* LOG_FILE = "car.log";
 
@@ -15,10 +16,12 @@ class Logger
     private:
         KillFlag& _kill_flag;
         bool _debug = true;
-        
+
+        Queue _queue; 
         
     public:
-        Logger(KillFlag &kill_flag, bool debug) : _kill_flag(kill_flag)
+        Logger(KillFlag &kill_flag, bool debug) : _kill_flag(kill_flag),
+                                                  _queue(LOG_FILE)
         {
             _debug = debug;
         }
