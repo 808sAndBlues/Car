@@ -25,6 +25,11 @@ EDGE TRIGGERED VS LEVEL TRIGGERED
 
 - Or is it?? I need to do more research on this
 
+# 10-21-24
+
+Finished up Signal class. Signal flag will hold custom handlers for sigterm and sigint signals because I don't want components to shutdown anything. Only component responsible for handiling shutdown is Signal. Vehicle manager will read status code of Signal class to determine shutdown.
+
+
 
 
 
