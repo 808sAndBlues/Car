@@ -2,8 +2,7 @@
 
 Queue::Queue(char* file_destination)
 {
-    // Init mutex
-    pthread_mutex_init(&_mutex, nullptr);
+    init_mutexes();
 
     // TODO: Setup output file
     _file_destination = file_destination;
@@ -16,10 +15,17 @@ Queue::Queue(char* file_destination)
     }
 }
 
+void Queue::init_mutexes()
+{
+    pthread_mutex_init(&_mutex, nullptr);
+    pthread_mutex_init(&_flush_mutex, nullptr);
+}
+
 Queue::~Queue()
 {
     _fstreamer.close();
     pthread_mutex_destroy(&_mutex);
+    pthread_mutex_destroy(&_flush_mutex);
 }
 
 void Queue::append(char *msg)
@@ -31,12 +37,7 @@ void Queue::add_msg(char* msg)
 {
     // TODO: Depending on severity, we may want to call 'trylock' or 'lock'
     // on the mutex...
-
-    if (pthread_mutex_lock(&_mutex) != 0) {
-        std::cout << "Error trying to lock mutex!\n";
-        std::perror("pthread_mutex_lock");
-        std::exit(-1); 
-    }
+    lock_mutex(&_mutex);
 
     while (_message_count < QUEUE_LEN && *msg != '\0') {
         _queue[_message_count] = *msg;
@@ -45,30 +46,32 @@ void Queue::add_msg(char* msg)
         ++_message_count;
     }
 
-    if (pthread_mutex_unlock(&_mutex) != 0) {
-        std::cout << "Failed to unlock mutex!\n";
-        std::perror("pthread_mutex_unlock");
-        std::exit(-1);
-    }
-
-
     if (_message_count >= QUEUE_LEN) {
         // TODO: Flush the buffer
         flush();
     }
-
-    if (pthread_mutex_lock(&_mutex) != 0) {
-        std::cout << "Error trying to lock mutex!\n";
-        std::perror("pthread_mutex_lock");
-        std::exit(-1); 
-    }
     
+
     // Add '\n' character to output
     _queue[_message_count] = '\n';
     ++_message_count;
 
-    if (pthread_mutex_unlock(&_mutex) != 0) {
-        std::cout << "Failed to unlock mutex!\n";
+    unlock_mutex(&_mutex);
+}
+
+void Queue::lock_mutex(pthread_mutex_t* mutex)
+{
+    if (pthread_mutex_lock(mutex) != 0) {
+        std::cout << "Error trying to lock mutex!\n";
+        std::perror("pthread_mutex_lock");
+        std::exit(-1); 
+    }
+}
+
+void Queue::unlock_mutex(pthread_mutex_t* mutex)
+{
+    if (pthread_mutex_unlock(mutex) != 0) {
+        std::cout << "Error trying to lock mutex!\n";
         std::perror("pthread_mutex_unlock");
         std::exit(-1);
     }
@@ -76,12 +79,7 @@ void Queue::add_msg(char* msg)
 
 void Queue::flush()
 {
-    
-    if (pthread_mutex_lock(&_mutex) != 0) {
-        std::cout << "Error trying to lock mutex!\n";
-        std::perror("pthread_mutex_lock");
-        std::exit(-1); 
-    }
+    lock_mutex(&_flush_mutex); 
 
     for (std::uint16_t i = 0; i < _message_count; ++i) {    
         _fstreamer << _queue[i];
@@ -89,11 +87,7 @@ void Queue::flush()
 
     reset();
 
-    if (pthread_mutex_unlock(&_mutex) != 0) {
-        std::cout << "Failed to unlock mutex!\n";
-        std::perror("pthread_mutex_unlock");
-        std::exit(-1);
-    }
+    unlock_mutex(&_flush_mutex);
 }
 
 void Queue::reset()

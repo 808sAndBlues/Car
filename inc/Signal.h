@@ -4,6 +4,8 @@
 #include <signal.h>
 #include <sys/epoll.h>
 #include <sys/signalfd.h>
+#include <sys/timerfd.h>
+#include <time.h>
 
 #include "Logger.h"
 
@@ -17,6 +19,7 @@ class Signal
         
         int _epoll_fd = 0;
         int _signal_fd = 0;
+        int _timer_fd = 0;
 
         sigset_t _signal_set;
 
@@ -25,9 +28,13 @@ class Signal
         void set_signal_handler();
         void set_signal_fds();
 
+        void set_timer_fd();
+
         void poll_events();
 
         void process_signal_fd();
+
+        void process_timer_fd();
 
         void evaluate_epoll_events(int num_fds, struct epoll_event* events);
 

@@ -24,11 +24,17 @@ class Queue
         std::ofstream _fstreamer;
 
         pthread_mutex_t _mutex = PTHREAD_MUTEX_INITIALIZER;
+        pthread_mutex_t _flush_mutex = PTHREAD_MUTEX_INITIALIZER;
 
         char* _file_destination = nullptr;
 
         void reset();
         void add_msg(char* msg);
+
+        void lock_mutex(pthread_mutex_t* mutex);
+        void unlock_mutex(pthread_mutex_t* mutex);
+
+        void init_mutexes();
 
 
     public:

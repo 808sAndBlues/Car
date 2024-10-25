@@ -4,6 +4,41 @@ void Signal::init()
 {
     set_signal_masks();
     set_signal_fds();
+    set_timer_fd();
+
+    _logger.log_debug("All file descriptors are ready!");
+}
+
+void Signal::set_timer_fd()
+{
+    _timer_fd = timerfd_create(CLOCK_BOOTTIME, 0);
+    if (_timer_fd == -1) {
+        std::cout << "Failed to create timerfd\n";
+        std::perror("timerfd_create");
+        std::exit(-1);
+    }
+    
+    struct itimerspec timer_spec = {0};
+    timer_spec.it_interval.tv_sec = 1;
+    timer_spec.it_interval.tv_nsec = 0;
+    timer_spec.it_value.tv_sec = 1;
+    timer_spec.it_value.tv_nsec = 0;
+
+    if (timerfd_settime(_timer_fd, 0, &timer_spec, nullptr) == -1) {
+        std::cout << "Failed to set timer\n";
+        std::perror("timerfd_settime");
+        std::exit(-1);
+    }
+
+    struct epoll_event ev = {0};
+    ev.events = EPOLLIN;
+    ev.data.fd = _timer_fd;
+
+    if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, _timer_fd, &ev) == -1) {
+        std::cout << "Failed to register timerfd to epoll\n";
+        std::perror("signalfd");
+        std::exit(-1);
+    }
 }
 
 void Signal::set_signal_fds()
@@ -22,8 +57,6 @@ void Signal::set_signal_fds()
         std::exit(-1);
     }
     
-    struct epoll_event events[MAX_EPOLL_EVENTS];
-
     struct epoll_event ev = {0};
     ev.events = EPOLLIN;
     ev.data.fd = _signal_fd;
@@ -33,7 +66,6 @@ void Signal::set_signal_fds()
         std::perror("signalfd");
         std::exit(-1);
     }
-
 }
 
 void Signal::set_signal_masks()
@@ -61,9 +93,6 @@ void Signal::set_signal_masks()
         std::perror("sigprocmask");
         std::exit(-1);
     }
-
-    // TODO: Update this w/ Log statements
-    std::cout << "Ready to catch SIGTERM and SIGINT\n";
 }
 
 void Signal::main_loop()
@@ -105,11 +134,22 @@ void Signal::evaluate_epoll_events(int fds, struct epoll_event* events)
             process_signal_fd();  
         }
 
-        else {
-            std::cout << "Uknown file descriptor\n";
+        else if (events[idx].data.fd == _timer_fd) {
+            _logger.log_debug("Timer expired!");
+            _logger.flush_log();
         }
+
+        else {
+            _logger.log_debug("Uknown file descriptor");
+        }
+
         ++idx;
     }
+}
+
+void Signal::process_timer_fd()
+{
+    // TODO: Read from timer fd 
 }
 
 void Signal::process_signal_fd()
