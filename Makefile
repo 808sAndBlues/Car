@@ -129,6 +129,30 @@ Car/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/build
 .PHONY : Car/fast
 
+src/Epoll.o: src/Epoll.cpp.o
+.PHONY : src/Epoll.o
+
+# target to build an object file
+src/Epoll.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Epoll.cpp.o
+.PHONY : src/Epoll.cpp.o
+
+src/Epoll.i: src/Epoll.cpp.i
+.PHONY : src/Epoll.i
+
+# target to preprocess a source file
+src/Epoll.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Epoll.cpp.i
+.PHONY : src/Epoll.cpp.i
+
+src/Epoll.s: src/Epoll.cpp.s
+.PHONY : src/Epoll.s
+
+# target to generate assembly for a file
+src/Epoll.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Epoll.cpp.s
+.PHONY : src/Epoll.cpp.s
+
 src/KillFlag.o: src/KillFlag.cpp.o
 .PHONY : src/KillFlag.o
 
@@ -258,6 +282,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Car"
+	@echo "... src/Epoll.o"
+	@echo "... src/Epoll.i"
+	@echo "... src/Epoll.s"
 	@echo "... src/KillFlag.o"
 	@echo "... src/KillFlag.i"
 	@echo "... src/KillFlag.s"

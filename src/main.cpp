@@ -34,10 +34,11 @@ int main(int argc, char* argv[])
                 break;
         }
     }
-
+    
     Logger logger(kill_flag, debug_mode);
-    Signal signal(logger, kill_flag);
+    logger.init();
 
+    Signal signal(logger, kill_flag);
     signal.init();
 
     if (pthread_create(&log_tid, nullptr, logger_main,

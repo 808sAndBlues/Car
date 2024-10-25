@@ -8,21 +8,19 @@
 #include <time.h>
 
 #include "Logger.h"
-
-constexpr int MAX_EPOLL_EVENTS = 255;
+#include "Epoll.h"
 
 class Signal
 {
     private:
         Logger& _logger;
         KillFlag& _kill_flag;
+        Epoll _epoll;
         
-        int _epoll_fd = 0;
         int _signal_fd = 0;
         int _timer_fd = 0;
 
         sigset_t _signal_set;
-
 
         void set_signal_masks();
         void set_signal_handler();
@@ -36,7 +34,7 @@ class Signal
 
         void process_timer_fd();
 
-        void evaluate_epoll_events(int num_fds, struct epoll_event* events);
+        void evaluate_epoll_events(int num_fds);
 
     public:
         Signal(Logger& logger, KillFlag& kill_flag) : _logger(logger),

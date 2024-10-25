@@ -7,6 +7,7 @@ include_directories(${PROJECT_SOURCE_DIR}/inc
 
 add_executable(Car 
     src/main.cpp src/Logger.cpp src/KillFlag.cpp 
-    src/Signal.cpp src/Queue.cpp)
+    src/Signal.cpp src/Queue.cpp
+    src/Epoll.cpp)
 
 

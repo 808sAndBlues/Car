@@ -85,6 +85,8 @@ void Queue::flush()
         _fstreamer << _queue[i];
     }
 
+    _fstreamer.flush();
+
     reset();
 
     unlock_mutex(&_flush_mutex);

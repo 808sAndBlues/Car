@@ -2,11 +2,13 @@
 
 void Signal::init()
 {
+    _epoll.init();
+
     set_signal_masks();
     set_signal_fds();
     set_timer_fd();
-
-    _logger.log_debug("All file descriptors are ready!");
+    
+    _logger.log_debug("Signal: Ready to go!");
 }
 
 void Signal::set_timer_fd()
@@ -29,41 +31,29 @@ void Signal::set_timer_fd()
         std::perror("timerfd_settime");
         std::exit(-1);
     }
+    
+    
+    // TODO: Replace below w/ Epoll stuff
 
-    struct epoll_event ev = {0};
-    ev.events = EPOLLIN;
-    ev.data.fd = _timer_fd;
-
-    if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, _timer_fd, &ev) == -1) {
-        std::cout << "Failed to register timerfd to epoll\n";
-        std::perror("signalfd");
+    if (_epoll.add_fd(_timer_fd) == -1) {
+        _logger.log_debug("Signal: Failed to add timer fd");
+        std::perror("Epoll::add_fd");
         std::exit(-1);
     }
 }
 
 void Signal::set_signal_fds()
 {
-    // Create epoll instance
-    if ((_epoll_fd = epoll_create(MAX_EPOLL_EVENTS)) == -1) {
-        std::cout << "Failed to create epoll instance\n";
-        std::perror("epoll_create");
-        std::exit(-1);
-    }
-    
     // Create signalfd and register to epoll
     if ((_signal_fd = signalfd(-1, &_signal_set, 0)) == -1) {
         std::cout << "Failed to create a signalfd\n";
         std::perror("signalfd");
         std::exit(-1);
     }
-    
-    struct epoll_event ev = {0};
-    ev.events = EPOLLIN;
-    ev.data.fd = _signal_fd;
 
-    if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, _signal_fd, &ev) == -1) {
-        std::cout << "Failed to register signalfd to epoll\n";
-        std::perror("signalfd");
+    if (_epoll.add_fd(_signal_fd) == -1) {
+        _logger.log_debug("Signal: Failed to add signal fd");
+        std::perror("Epoll::add_fd");
         std::exit(-1);
     }
 }
@@ -114,8 +104,7 @@ void Signal::main_loop()
 
 void Signal::poll_events()
 {
-    struct epoll_event events[MAX_EPOLL_EVENTS];
-    int num_fds = epoll_wait(_epoll_fd, events, MAX_EPOLL_EVENTS, -1);
+    int num_fds = _epoll.poll_events(0);
 
     if (num_fds == -1) {
         std::cout << "Failed to wait\n";
@@ -123,24 +112,25 @@ void Signal::poll_events()
         std::exit(-1);
     }
 
-    evaluate_epoll_events(num_fds, events);
+    evaluate_epoll_events(num_fds);
 }
 
-void Signal::evaluate_epoll_events(int fds, struct epoll_event* events)
+void Signal::evaluate_epoll_events(int fds)
 {
+    struct epoll_event* events = _epoll.get_events();
     int idx = 0;
+
     while (idx < fds) {
         if (events[idx].data.fd == _signal_fd) {
             process_signal_fd();  
         }
 
         else if (events[idx].data.fd == _timer_fd) {
-            _logger.log_debug("Timer expired!");
-            _logger.flush_log();
+            process_timer_fd();
         }
 
         else {
-            _logger.log_debug("Uknown file descriptor");
+            _logger.log_debug("Unknown file descriptor");
         }
 
         ++idx;
@@ -149,7 +139,18 @@ void Signal::evaluate_epoll_events(int fds, struct epoll_event* events)
 
 void Signal::process_timer_fd()
 {
-    // TODO: Read from timer fd 
+    // TODO: Read from timer fd
+
+    std::uint64_t num_expirations = 0;
+    int read_count = read(_timer_fd, &num_expirations, sizeof(num_expirations));
+
+    if (read_count != sizeof(num_expirations)) {
+        _logger.log_debug("Signal: Error reading timer fd");
+    }
+
+    else {
+        _logger.log_debug("Signal: Timer expired!");
+    }
 }
 
 void Signal::process_signal_fd()
@@ -163,19 +164,18 @@ void Signal::process_signal_fd()
 
     switch (sig_info.ssi_signo) {
         case SIGINT:
-            std::cout << "Received SIGINT!\n";
+            _logger.log_debug("Signal: Received SIGINT");
             shutdown_sequence();
             break;
 
         case SIGTERM:
-            std::cout << "Received SIGTERM\n";
+            _logger.log_debug("Signal: Received SIGINTERM");
             shutdown_sequence();
             break;
 
         default:
             std::cout << "Uknown signal flag received " << sig_info.ssi_signo
                       << "\n";
-
             break;
     }
 }
@@ -185,8 +185,6 @@ void Signal::shutdown_sequence()
     _logger.flush_log();
     _kill_flag.kill();
 }
-
-
 
 void* signal_main_loop(void* obj)
 {
