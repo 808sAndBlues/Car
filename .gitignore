@@ -1,7 +1,10 @@
 CMakeCache.txt
-CMakeFiles/*
+*CMakeFiles/*
 *.cmake
 *.swp
 *.swo
 *.log
+*.o
+test/CMakeFiles*
 Car
+ut
