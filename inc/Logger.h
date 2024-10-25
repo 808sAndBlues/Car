@@ -30,6 +30,8 @@ class Logger
         void log_error(char *msg);
         void log_warning(char *msg);
 
+        void flush_log();
+
         void main_loop();
 };
 

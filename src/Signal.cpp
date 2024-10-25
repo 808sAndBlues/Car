@@ -79,7 +79,7 @@ void Signal::main_loop()
      */
 
     while (!_kill_flag.get_kill()) {
-        poll_events();    
+        poll_events();
     }
 }
 
@@ -124,12 +124,12 @@ void Signal::process_signal_fd()
     switch (sig_info.ssi_signo) {
         case SIGINT:
             std::cout << "Received SIGINT!\n";
-            _kill_flag.kill();
+            shutdown_sequence();
             break;
 
         case SIGTERM:
             std::cout << "Received SIGTERM\n";
-            _kill_flag.kill();
+            shutdown_sequence();
             break;
 
         default:
@@ -138,6 +138,12 @@ void Signal::process_signal_fd()
 
             break;
     }
+}
+
+void Signal::shutdown_sequence()
+{
+    _logger.flush_log();
+    _kill_flag.kill();
 }
 
 

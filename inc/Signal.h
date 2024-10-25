@@ -37,6 +37,8 @@ class Signal
 
         void init();
         void main_loop();
+
+        void shutdown_sequence();
          
 };
 
