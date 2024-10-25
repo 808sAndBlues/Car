@@ -11,6 +11,8 @@ void Logger::init()
 {
     setup_epoll();
     setup_timerfd();
+
+    log_debug("Logger: Ready to go!");
 }
 
 void Logger::setup_epoll()
@@ -48,8 +50,9 @@ void Logger::setup_timerfd()
         log_debug("Logger: Error adding timerfd to Epoll object");
         std::perror("Epoll::add_fd");
         std::exit(-1);
-    } 
-    std::cout << "Added timer to epoll object\n";
+    }
+
+    log_debug("Logger: Added timer to Epoll object");
 }
 
 void Logger::poll_events()

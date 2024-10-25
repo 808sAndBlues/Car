@@ -16,11 +16,10 @@ class Signal
         Logger& _logger;
         KillFlag& _kill_flag;
         Epoll _epoll;
+        sigset_t _signal_set;
         
         int _signal_fd = 0;
         int _timer_fd = 0;
-
-        sigset_t _signal_set;
 
         void set_signal_masks();
         void set_signal_handler();
@@ -44,10 +43,8 @@ class Signal
         void main_loop();
 
         void shutdown_sequence();
-         
 };
 
 void* signal_main_loop(void* obj);
-
 
 #endif

@@ -20,13 +20,11 @@ class Logger
     private:
         KillFlag& _kill_flag;
         Epoll     _epoll;
-
-        bool _debug = true;
-
-        int _timer_fd = 0;
-
         Queue _queue;
 
+        bool _debug         = true;
+
+        int _timer_fd       = 0;
 
         void setup_epoll();
 
