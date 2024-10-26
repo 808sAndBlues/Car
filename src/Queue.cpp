@@ -1,14 +1,15 @@
 #include "Queue.h"
 
-Queue::Queue(char* file_destination)
+Queue::Queue(const char* file_destination)
 {
     init_mutexes();
 
-    // TODO: Setup output file
+    // TODO: Check for failure
     _file_destination = file_destination;
     
     _fstreamer.open(_file_destination, MODE);
-    if (!_fstreamer.is_open()) {
+
+    if (!_fstreamer.is_open() || file_operation_failed()) {
         std::cout << "Could not open file";
         std::perror("is_open");
         std::exit(-1);
@@ -28,12 +29,12 @@ Queue::~Queue()
     pthread_mutex_destroy(&_flush_mutex);
 }
 
-void Queue::append(char *msg)
+void Queue::append(const char *msg)
 {
     add_msg(msg);
 }
 
-void Queue::add_msg(char* msg)
+void Queue::add_msg(const char* msg)
 {
     // TODO: Depending on severity, we may want to call 'trylock' or 'lock'
     // on the mutex...
@@ -47,12 +48,9 @@ void Queue::add_msg(char* msg)
     }
 
     if (_message_count >= QUEUE_LEN) {
-        // TODO: Flush the buffer
         flush();
     }
-    
 
-    // Add '\n' character to output
     _queue[_message_count] = '\n';
     ++_message_count;
 
@@ -94,7 +92,17 @@ void Queue::flush()
 
 void Queue::reset()
 {
-    // TODO: Verify that _queue is not set to nullptr after memset
     _message_count = 0;
     std::memset(_queue, 0, sizeof(char*) * MAX_MSG_COUNT);
 }
+
+std::uint16_t Queue::get_msg_count()
+{
+    return _message_count;
+}
+
+bool Queue::file_operation_failed()
+{
+    return _fstreamer.fail();
+}
+

@@ -100,7 +100,7 @@ void Logger::evaluate_events(int fds)
 }
 
 
-void Logger::log_debug(char* msg)
+void Logger::log_debug(const char* msg)
 {
     _queue.append(msg);
 }

@@ -13,7 +13,7 @@
 #include "Queue.h"
 #include "Epoll.h"
 
-constexpr char* LOG_FILE = "car.log";
+constexpr const char* LOG_FILE = "car.log";
 
 class Logger
 {
@@ -43,9 +43,9 @@ class Logger
         {
         }
 
-        void log_debug(char * msg);
-        void log_error(char *msg);
-        void log_warning(char *msg);
+        void log_debug(const char * msg);
+        void log_error(const char *msg);
+        void log_warning(const char *msg);
 
         void flush_log();
 

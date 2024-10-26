@@ -140,29 +140,53 @@ ut/fast:
 	cd /home/ojeet/projects/Car && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/build
 .PHONY : ut/fast
 
-test.o: test.cpp.o
-.PHONY : test.o
+QueueTest.o: QueueTest.cpp.o
+.PHONY : QueueTest.o
 
 # target to build an object file
-test.cpp.o:
-	cd /home/ojeet/projects/Car && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/test.cpp.o
-.PHONY : test.cpp.o
+QueueTest.cpp.o:
+	cd /home/ojeet/projects/Car && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/QueueTest.cpp.o
+.PHONY : QueueTest.cpp.o
 
-test.i: test.cpp.i
-.PHONY : test.i
+QueueTest.i: QueueTest.cpp.i
+.PHONY : QueueTest.i
 
 # target to preprocess a source file
-test.cpp.i:
-	cd /home/ojeet/projects/Car && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/test.cpp.i
-.PHONY : test.cpp.i
+QueueTest.cpp.i:
+	cd /home/ojeet/projects/Car && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/QueueTest.cpp.i
+.PHONY : QueueTest.cpp.i
 
-test.s: test.cpp.s
-.PHONY : test.s
+QueueTest.s: QueueTest.cpp.s
+.PHONY : QueueTest.s
 
 # target to generate assembly for a file
-test.cpp.s:
-	cd /home/ojeet/projects/Car && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/test.cpp.s
-.PHONY : test.cpp.s
+QueueTest.cpp.s:
+	cd /home/ojeet/projects/Car && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/QueueTest.cpp.s
+.PHONY : QueueTest.cpp.s
+
+__/src/Queue.o: __/src/Queue.cpp.o
+.PHONY : __/src/Queue.o
+
+# target to build an object file
+__/src/Queue.cpp.o:
+	cd /home/ojeet/projects/Car && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/__/src/Queue.cpp.o
+.PHONY : __/src/Queue.cpp.o
+
+__/src/Queue.i: __/src/Queue.cpp.i
+.PHONY : __/src/Queue.i
+
+# target to preprocess a source file
+__/src/Queue.cpp.i:
+	cd /home/ojeet/projects/Car && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/__/src/Queue.cpp.i
+.PHONY : __/src/Queue.cpp.i
+
+__/src/Queue.s: __/src/Queue.cpp.s
+.PHONY : __/src/Queue.s
+
+# target to generate assembly for a file
+__/src/Queue.cpp.s:
+	cd /home/ojeet/projects/Car && $(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/__/src/Queue.cpp.s
+.PHONY : __/src/Queue.cpp.s
 
 # Help Target
 help:
@@ -174,9 +198,12 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... ut"
-	@echo "... test.o"
-	@echo "... test.i"
-	@echo "... test.s"
+	@echo "... QueueTest.o"
+	@echo "... QueueTest.i"
+	@echo "... QueueTest.s"
+	@echo "... __/src/Queue.o"
+	@echo "... __/src/Queue.i"
+	@echo "... __/src/Queue.s"
 .PHONY : help
 
 
