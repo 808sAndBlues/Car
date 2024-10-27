@@ -152,6 +152,30 @@ ut/fast:
 	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/build
 .PHONY : ut/fast
 
+src/BcmManager.o: src/BcmManager.cpp.o
+.PHONY : src/BcmManager.o
+
+# target to build an object file
+src/BcmManager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/BcmManager.cpp.o
+.PHONY : src/BcmManager.cpp.o
+
+src/BcmManager.i: src/BcmManager.cpp.i
+.PHONY : src/BcmManager.i
+
+# target to preprocess a source file
+src/BcmManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/BcmManager.cpp.i
+.PHONY : src/BcmManager.cpp.i
+
+src/BcmManager.s: src/BcmManager.cpp.s
+.PHONY : src/BcmManager.s
+
+# target to generate assembly for a file
+src/BcmManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/BcmManager.cpp.s
+.PHONY : src/BcmManager.cpp.s
+
 src/Epoll.o: src/Epoll.cpp.o
 .PHONY : src/Epoll.o
 
@@ -307,6 +331,9 @@ help:
 	@echo "... test"
 	@echo "... Car"
 	@echo "... ut"
+	@echo "... src/BcmManager.o"
+	@echo "... src/BcmManager.i"
+	@echo "... src/BcmManager.s"
 	@echo "... src/Epoll.o"
 	@echo "... src/Epoll.i"
 	@echo "... src/Epoll.s"

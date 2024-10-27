@@ -26,8 +26,6 @@ class Epoll
         int poll_events(int ms_timeout);
 
         struct epoll_event* get_events();
-
-
 };
 
 
