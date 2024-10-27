@@ -3,18 +3,31 @@
 #include <pthread.h>
 #include <signal.h>
 #include <atomic>
+#include <bcm2835.h>
 
 #include "Logger.h"
 #include "Signal.h"
 
+#define GPIO_LEVEL_ADDRESS_0 0x3F200034
+#define GPIO_LEVEL_ADDRESS_1 0x3F200038
+#define GPIO_LEVEL_0_MAX     31
+#define GPIO_COUNT           54
+
 const char* OPT_STRING = "d::";
 KillFlag kill_flag;
+
 
 
 int main(int argc, char* argv[])
 {
     std::int16_t c = 0;
     bool debug_mode = false;
+
+    if (!bcm2835_init()) {
+        std::cout << "Failed to init bcm2385 module\n";
+        std::exit(-1);
+    }
+
 
 
     // TODO: Store pthread_t values into array for easier creation/deletion
@@ -40,6 +53,10 @@ int main(int argc, char* argv[])
 
     Signal signal(logger, kill_flag);
     signal.init();
+
+    // TODO: Light up LED if all is good
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_36, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_gpio_set(RPI_BPLUS_GPIO_J8_36);
 
     if (pthread_create(&log_tid, nullptr, logger_main,
                        &logger) == -1) {
@@ -69,6 +86,9 @@ int main(int argc, char* argv[])
         std::perror("pthread_join");
         std::exit(-1);
     }
+
+
+    bcm2835_gpio_clr(RPI_BPLUS_GPIO_J8_36);
 
     return 0;
 }

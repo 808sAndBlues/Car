@@ -12,3 +12,5 @@ add_executable(Car
 enable_testing()
 add_subdirectory(test)
 
+target_link_libraries(Car bcm2835)
+
