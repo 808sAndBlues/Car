@@ -16,6 +16,8 @@ void BcmManager::init()
     }
 
     set_init_led();
+
+    _logger.log_debug("BcmManager: Initialized");
 }
 
 void BcmManager::set_init_led()
@@ -23,22 +25,33 @@ void BcmManager::set_init_led()
     //TODO: Set GPIO to output
     bcm2835_gpio_fsel(INIT_LED_GPIO_PIN, BCM2835_GPIO_FSEL_OUTP);
     set_pin(INIT_LED_GPIO_PIN);
+
+    _logger.log_debug("BcmManager: Init LED has been turned on");
 }
 
 void BcmManager::close_init_led()
 {
     clear_pin(INIT_LED_GPIO_PIN);
+    _logger.log_debug("BcmManager: Init LED has been turned off");
 }
 
 void BcmManager::set_adventure_led()
 {
     bcm2835_gpio_fsel(ADVENTURE_LED_GPIO_PIN, BCM2835_GPIO_FSEL_OUTP);
     set_pin(ADVENTURE_LED_GPIO_PIN);
+
+    _logger.log_debug("BcmManager: Adventure LED has been lit");
 }
 
 void BcmManager::close_adventure_led()
 {
-    clear_pin(ADVENTURE_LED_GPIO_PIN); 
+    clear_pin(ADVENTURE_LED_GPIO_PIN);
+    _logger.log_debug("BcmManager: Adventure LED has been turned off");
+
+    // TODO: Force a flush since turning off the adventure LED indicates a 
+    // problem/shutdown
+
+    _logger.flush_log();
 }
 
 void BcmManager::step(int val)
