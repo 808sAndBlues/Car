@@ -20,6 +20,7 @@ int main(int argc, char* argv[])
     // TODO: Store pthread_t values into array for easier creation/deletion
     pthread_t log_tid = 0;
     pthread_t signal_tid = 0;
+    pthread_t bcm_tid = 0;
 
     while ((c = getopt(argc, argv, OPT_STRING)) != -1) {
         switch (c) {
@@ -41,7 +42,7 @@ int main(int argc, char* argv[])
     Signal signal(logger, kill_flag);
     signal.init();
 
-    BcmManager bcm_manager(logger);
+    BcmManager bcm_manager(logger, kill_flag);
     bcm_manager.init();
 
     if (pthread_create(&log_tid, nullptr, logger_main,
@@ -53,6 +54,12 @@ int main(int argc, char* argv[])
     
     if (pthread_create(&signal_tid, nullptr, signal_main_loop, &signal) == -1) {
         std::cout << "Error creating thread for signal\n";
+        std::perror("pthread_crate\n");
+        std::exit(-1);
+    }
+    
+    if (pthread_create(&bcm_tid, nullptr, bcm_manager_main_loop, &bcm_manager) == -1) {
+        std::cout << "Error creating thread for bcm\n";
         std::perror("pthread_crate\n");
         std::exit(-1);
     }
@@ -71,6 +78,11 @@ int main(int argc, char* argv[])
         std::exit(-1);
     }
 
+    if (pthread_join(bcm_tid, nullptr) == -1) {
+        std::cout << "Error joining thread\n";
+        std::perror("pthread_join");
+        std::exit(-1);
+    }
     return 0;
 }
 

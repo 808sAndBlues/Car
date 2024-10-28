@@ -9,7 +9,9 @@
 #include "KillFlag.h"
 #include "Epoll.h"
 
-#define GPIO_COUNT 26
+#define GPIO_COUNT              26
+#define INIT_LED_GPIO_PIN       RPI_BPLUS_GPIO_J8_07
+#define ADVENTURE_LED_GPIO_PIN  RPI_BPLUS_GPIO_J8_40
 
 const RPiGPIOPin GPIO_PINS[] = 
 {
@@ -35,12 +37,24 @@ class BcmManager
 
         void setup_timerfd();
 
+        void set_init_led();
+
+        void close_init_led();
+
+        void set_adventure_led();
+        
+        void close_adventure_led();
+
         void poll_events();
 
         void evaluate_events();
 
+        void step(int val);
+
     public:
-        BcmManager(Logger& logger) : _logger(logger) {}
+        BcmManager(Logger& logger, KillFlag& kill_flag) : _logger(logger),
+                                                          _kill_flag(kill_flag)
+        {}
 
         ~BcmManager();
 
