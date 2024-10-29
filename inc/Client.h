@@ -15,28 +15,22 @@
 
 class Client
 {
-
     protected:
         //TODO: Add SocketStatus Enum value
         Logger& _logger;
-        KillFlag& _kill_flag;
         Epoll _epoll;
 
         int _socket_fd = 0;
         struct sockaddr_in _addr = {0};
 
     public:
-        Client(Logger& logger, KillFlag& kill_flag) : _logger(logger),
-                                                      _kill_flag(kill_flag) {}
+        Client(Logger& logger) : _logger(logger) {}
 
         void init();
 
-        void main_loop();
+        void send_data(std::uint8_t *buf, int length);
 
+        void close();
 };
-
-void* client_main_loop(void* obj);
-
-
 
 #endif

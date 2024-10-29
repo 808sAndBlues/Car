@@ -1,25 +1,27 @@
 #include "Client.h"
 
-
-void Client::main_loop()
+void Client::send_data(std::uint8_t* buf, int length)
 {
-    int sent = sendto(_socket_fd, "Hello", sizeof("Hello"), 0,
-                      (struct sockaddr*) &_addr, sizeof(_addr));
-    if (sent == -1) {
-        std::perror("sendto");
-        _kill_flag.kill();
-        std::exit(-1);
+    std::uint32_t sent = 0;
+    std::uint32_t remaining = length;
+
+    while (remaining > 0) {
+        sent = sendto(_socket_fd, buf + (length - remaining), 
+                      remaining, 0, (struct sockaddr*) &_addr, sizeof(_addr));
+
+        if (sent == -1) {
+            _logger.log_debug("Client: Failed to send data");
+            std::perror("sendto");
+            std::exit(-1);
+        }
+
+        else {
+            remaining -= sent;
+            
+            // TODO: Add logging statement for number of 
+        }
     }
-
-    std::cout << "Sent: " << sent << "\n";
-
-    while (!_kill_flag.get_kill()) {
-        usleep(1000000);            
-    }
-
-    close(_socket_fd);
 }
-
 
 void Client::init()
 {
@@ -45,11 +47,8 @@ void Client::init()
     _logger.log_debug("Client: Connected to server");
 }
 
-
-void* client_main_loop(void* obj)
+void Client::close()
 {
-    Client* client = (Client*) obj;
-    client->main_loop();
-
-    return nullptr;
+    ::close(_socket_fd); 
 }
+

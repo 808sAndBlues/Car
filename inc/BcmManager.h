@@ -8,8 +8,9 @@
 #include "Logger.h"
 #include "KillFlag.h"
 #include "Epoll.h"
+#include "Client.h"
+#include "Telemetry.h"
 
-#define GPIO_COUNT              26
 #define INIT_LED_GPIO_PIN       RPI_BPLUS_GPIO_J8_07
 #define ADVENTURE_LED_GPIO_PIN  RPI_BPLUS_GPIO_J8_40
 
@@ -32,6 +33,9 @@ class BcmManager
         Logger& _logger;
         KillFlag& _kill_flag;
         Epoll _epoll;
+        Client _client;
+
+        GPIOStatus _gpio_status;
 
         int _timerfd = 0;
 
@@ -47,14 +51,22 @@ class BcmManager
 
         void poll_events();
 
-        void evaluate_events();
+        void evaluate_events(int fds);
 
         void step(int val);
 
+        void setup_epoll();
+
+        void timer_handler();
+
+        void send_gpio_status();
+
+        void serialize_gpio_status(std::uint8_t* buf, int length);
+
+        void update_gpio_status();
+
     public:
-        BcmManager(Logger& logger, KillFlag& kill_flag) : _logger(logger),
-                                                          _kill_flag(kill_flag)
-        {}
+        BcmManager(Logger& logger, KillFlag& kill_flag);
 
         ~BcmManager();
 

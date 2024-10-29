@@ -22,7 +22,6 @@ int main(int argc, char* argv[])
     pthread_t log_tid = 0;
     pthread_t signal_tid = 0;
     pthread_t bcm_tid = 0;
-    pthread_t client_tid = 0;
 
     while ((c = getopt(argc, argv, OPT_STRING)) != -1) {
         switch (c) {
@@ -47,9 +46,6 @@ int main(int argc, char* argv[])
     BcmManager bcm_manager(logger, kill_flag);
     bcm_manager.init();
 
-    Client client(logger, kill_flag);
-    client.init();
-
     if (pthread_create(&bcm_tid, nullptr, bcm_manager_main_loop, &bcm_manager) == -1) {
         std::cout << "Error creating thread for bcm\n";
         std::perror("pthread_crate\n");
@@ -68,12 +64,8 @@ int main(int argc, char* argv[])
         std::perror("pthread_crate\n");
         std::exit(-1);
     }
-    
-    if (pthread_create(&client_tid, nullptr, client_main_loop, &client) == -1) {
-        std::cout << "Error creating thread for client loop\n";
-        std::perror("pthread_crate\n");
-        std::exit(-1);
-    }
+
+    // JOIN THREADS
     
     if (pthread_join(bcm_tid, nullptr) == -1) {
         std::cout << "Error joining thread\n";
@@ -88,12 +80,6 @@ int main(int argc, char* argv[])
     }
 
     if (pthread_join(log_tid, nullptr) == -1) {
-        std::cout << "Error joining thread\n";
-        std::perror("pthread_join");
-        std::exit(-1);
-    }
-
-    if (pthread_join(client_tid, nullptr) == -1) {
         std::cout << "Error joining thread\n";
         std::perror("pthread_join");
         std::exit(-1);

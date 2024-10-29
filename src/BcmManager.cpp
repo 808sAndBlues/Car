@@ -1,8 +1,22 @@
 #include "BcmManager.h"
 
-void BcmManager::init()
+BcmManager::BcmManager(Logger& logger,
+                       KillFlag& kill_flag) : _logger(logger),
+                                              _kill_flag(kill_flag),
+                                              _client(logger)
+{
+    _client.init();
+}
+
+void BcmManager::setup_epoll()
 {
     _epoll.init();
+    setup_timerfd();
+}
+
+void BcmManager::init()
+{
+    setup_epoll();
 
     if (!bcm2835_init()) {
         _logger.log_debug("Failed to init BCM2385 lbirary");
@@ -54,6 +68,155 @@ void BcmManager::close_adventure_led()
     _logger.flush_log();
 }
 
+void BcmManager::setup_timerfd()
+{
+    _timerfd = timerfd_create(CLOCK_BOOTTIME, 0);
+
+    struct itimerspec timer_spec = {0};
+    timer_spec.it_value.tv_sec = 1;
+    timer_spec.it_value.tv_nsec = 0;
+    timer_spec.it_interval.tv_sec = 1;
+    timer_spec.it_interval.tv_nsec = 0;
+
+    if (timerfd_settime(_timerfd, 0, &timer_spec, nullptr) == -1) {
+        _logger.log_debug("BcmManager: Failed to setup timerfd");
+        std::perror("timerfd_settime");
+        std::exit(-1);
+    }
+
+    if (_epoll.add_fd(_timerfd) == -1) {
+        _logger.log_debug("BcmManager: Failed to add timerfd");
+        std::perror("epoll_ctl");
+        std::exit(-1);
+    }
+}
+
+void BcmManager::poll_events()
+{ 
+   int fds = _epoll.poll_events(0);
+   evaluate_events(fds);
+}
+
+void BcmManager::evaluate_events(int fds)
+{
+    struct epoll_event* events = _epoll.get_events();
+
+    for (int i = 0; i < fds; ++i) {
+        if (events[i].data.fd == _timerfd) {
+            // TODO: Call timer handler
+            timer_handler();
+        }
+    }
+}
+
+void BcmManager::timer_handler()
+{
+    std::uint64_t num_expirations = 0;
+    int count = read(_timerfd, &num_expirations, sizeof(std::uint64_t));
+    
+    if (count == -1) {
+        _logger.log_debug("BcmManager: Failed to read from timerfd");
+        std::perror("read");
+        std::exit(-1);
+    }
+
+    else {
+        // TODO: Update this to be a "general" telemetry send function
+        send_gpio_status();
+    }
+}
+
+void BcmManager::send_gpio_status()
+{
+    std::uint8_t buf[sizeof(GPIOStatus)] = {0};
+
+    update_gpio_status();
+    
+    serialize_gpio_status(buf, sizeof(GPIOStatus));
+
+    _client.send_data(buf, sizeof(GPIOStatus));
+
+    _logger.log_debug("BcmManager: Sent GPIO Status");
+}
+
+void BcmManager::update_gpio_status()
+{
+    _gpio_status.header = TELEMETRY_HDR;
+    _gpio_status.id = GPIO_STATUS;
+    _gpio_status.len = GPIO_STATUS_LEN;
+    _gpio_status.tlr = TELEMETRY_TLR;
+
+    for (std::uint8_t i = 0; i < GPIO_COUNT; ++i) {
+        _gpio_status.gpio_status[i] = bcm2835_gpio_lev(GPIO_PINS[i]);
+    }
+}
+
+void BcmManager::serialize_gpio_status(std::uint8_t* buf, int length)
+{
+    std::uint8_t* ptr = buf;
+
+    // Set header
+    *ptr = _gpio_status.header;
+    ++ptr;
+
+    // Set len
+    *ptr = _gpio_status.len;
+    ++ptr; 
+
+    // Set id
+    *ptr = _gpio_status.id;
+    ++ptr;
+
+    for (std::uint8_t i = 0; i < GPIO_COUNT; ++i) {
+        *ptr = _gpio_status.gpio_status[i];
+        ++ptr; 
+    }
+
+    // Set tlr
+    *ptr = _gpio_status.tlr;
+}
+
+BcmManager::~BcmManager()
+{
+    // TODO: Check return code
+    bcm2835_close();
+}
+
+void BcmManager::set_io_state(RPiGPIOPin pin, bcm2835FunctionSelect mode)
+{
+    bcm2835_gpio_fsel(pin, mode);
+}
+
+void BcmManager::set_pin(RPiGPIOPin physical_pin)
+{
+    bcm2835_gpio_set(physical_pin);
+}
+
+void BcmManager::clear_pin(RPiGPIOPin physical_pin)
+{
+    bcm2835_gpio_clr(physical_pin);
+}
+
+void BcmManager::main_loop()
+{
+    close_init_led();
+    set_adventure_led();
+
+    while (!_kill_flag.get_kill()) {
+        poll_events();
+    }
+
+    close_adventure_led();
+    _client.close();
+}
+
+void* bcm_manager_main_loop(void* obj)
+{
+    BcmManager* bcm_mgr_ptr = (BcmManager*) obj;
+    bcm_mgr_ptr->main_loop();
+    return nullptr;
+}
+
 void BcmManager::step(int val)
 {
     switch(val)
@@ -93,73 +256,4 @@ void BcmManager::step(int val)
 
             break;
     }
-
-}
-/*
-void BcmManager::setup_timerfd()
-{
-    _timerfd = timerfd_create(CLOCK_BOOTTIME, 0);
-
-    struct itimerspec timer_spec = {0};
-    timer_spec.it_value.sec = 1;
-    timer_sepc.it_value.nsec = 0;
-    timer_spec.it_interval.sec = 1;
-    timer_spec.it_interval.nsec = 0;
-
-    _epoll.add_fd(_timerfd);
-}*/
-
-void BcmManager::poll_events()
-{
-    int fds = _epoll.poll_events(0);
-}
-
-/*void BcmManager::evaluate_events(int fds)
-{
-    struct epoll_event* events = _epoll.get_events();
-
-    for (int i = 0; i < fds; ++i) {
-        if (events[i].data.fd == _timerfd) {
-            // TODO: Call timer handler
-        }
-    }
-}*/
-
-BcmManager::~BcmManager()
-{
-    // TODO: Check return code
-    bcm2835_close();
-}
-
-void BcmManager::set_io_state(RPiGPIOPin pin, bcm2835FunctionSelect mode)
-{
-    bcm2835_gpio_fsel(pin, mode);
-}
-
-void BcmManager::set_pin(RPiGPIOPin physical_pin)
-{
-    bcm2835_gpio_set(physical_pin);
-}
-
-void BcmManager::clear_pin(RPiGPIOPin physical_pin)
-{
-    bcm2835_gpio_clr(physical_pin);
-}
-
-void BcmManager::main_loop()
-{
-    close_init_led();
-    set_adventure_led();
-
-    while (!_kill_flag.get_kill()) {
-    }
-
-    close_adventure_led();
-}
-
-void* bcm_manager_main_loop(void* obj)
-{
-    BcmManager* bcm_mgr_ptr = (BcmManager*) obj;
-    bcm_mgr_ptr->main_loop();
-    return nullptr;
 }
