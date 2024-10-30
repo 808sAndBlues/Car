@@ -123,7 +123,53 @@ void BcmManager::timer_handler()
     else {
         // TODO: Update this to be a "general" telemetry send function
         send_gpio_status();
+        send_time_status();
     }
+}
+
+void BcmManager::send_time_status()
+{
+    std::uint8_t buf[sizeof(TimeStatus)] = {0};
+
+    update_time_status();
+
+    serialize_time_status(buf, sizeof(TimeStatus));
+
+    _client.send_data(buf, sizeof(TimeStatus));
+
+    _logger.log_debug("BcmManager: Sent TimeStatus");
+}
+
+void BcmManager::serialize_time_status(std::uint8_t* buf, int length)
+{
+    std::uint8_t* ptr = buf;
+    *ptr = _time_status.header;
+    ++ptr;
+
+    *ptr = _time_status.len;
+    ++ptr;
+
+    *ptr = _time_status.id;
+    ++ptr;
+
+    std::uint32_t be_elapsed_time = htobe32(_time_status.t_seconds);  
+
+    std::memcpy(ptr, &be_elapsed_time, sizeof(be_elapsed_time));
+    ptr += sizeof(be_elapsed_time);
+
+    *ptr = _time_status.tlr;
+     
+}
+
+void BcmManager::update_time_status()
+{
+    _time_status.header = TELEMETRY_HDR;
+    _time_status.id = TIME_STATUS;
+    _time_status.len = TIME_STATUS_LEN;
+    _time_status.tlr = TELEMETRY_TLR;
+
+    _time_status.t_seconds += 1;
+    
 }
 
 void BcmManager::send_gpio_status()

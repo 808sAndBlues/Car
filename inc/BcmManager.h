@@ -4,6 +4,7 @@
 #include <bcm2835.h>
 #include <cstdint>
 #include <sys/timerfd.h>
+#include <endian.h>
 
 #include "Logger.h"
 #include "KillFlag.h"
@@ -36,6 +37,7 @@ class BcmManager
         Client _client;
 
         GPIOStatus _gpio_status;
+        TimeStatus _time_status;
 
         int _timerfd = 0;
 
@@ -64,6 +66,12 @@ class BcmManager
         void serialize_gpio_status(std::uint8_t* buf, int length);
 
         void update_gpio_status();
+
+        void send_time_status();
+        
+        void serialize_time_status(std::uint8_t* buf, int length);
+
+        void update_time_status();
 
     public:
         BcmManager(Logger& logger, KillFlag& kill_flag);
