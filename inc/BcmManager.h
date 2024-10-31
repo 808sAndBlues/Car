@@ -73,6 +73,8 @@ class BcmManager
 
         void update_time_status();
 
+        void send_telemetry();
+
     public:
         BcmManager(Logger& logger, KillFlag& kill_flag);
 

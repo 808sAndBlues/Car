@@ -31,6 +31,7 @@ void BcmManager::init()
 
     set_init_led();
 
+
     _logger.log_debug("BcmManager: Initialized");
 }
 
@@ -89,6 +90,12 @@ void BcmManager::setup_timerfd()
         std::perror("epoll_ctl");
         std::exit(-1);
     }
+}
+
+void BcmManager::send_telemetry()
+{
+    send_gpio_status();
+    send_time_status();
 }
 
 void BcmManager::poll_events()
@@ -158,7 +165,6 @@ void BcmManager::serialize_time_status(std::uint8_t* buf, int length)
     ptr += sizeof(be_elapsed_time);
 
     *ptr = _time_status.tlr;
-     
 }
 
 void BcmManager::update_time_status()
@@ -174,6 +180,7 @@ void BcmManager::update_time_status()
 
 void BcmManager::send_gpio_status()
 {
+
     std::uint8_t buf[sizeof(GPIOStatus)] = {0};
 
     update_gpio_status();
@@ -247,12 +254,39 @@ void BcmManager::main_loop()
 {
     close_init_led();
     set_adventure_led();
+    int data = 0;
+    int direction = 1;
+
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_16, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(RPI_BPLUS_GPIO_J8_16);
+
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_18, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(RPI_BPLUS_GPIO_J8_18);
+    
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_12, BCM2835_GPIO_FSEL_ALT5);
+
+
+    //bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_33, BCM2835_GPIO_FSEL_OUTP);
+    bcm2835_pwm_set_clock(BCM2835_PWM_CLOCK_DIVIDER_16);
+    bcm2835_pwm_set_mode(0, 1, 1);
+    bcm2835_pwm_set_range(0, 1024);
+
+    bcm2835_pwm_set_data(0, 1023);
+
+    set_pin(RPI_BPLUS_GPIO_J8_16);
 
     while (!_kill_flag.get_kill()) {
+        
+//        bcm2835_pwm_set_data(0, data);
+        bcm2835_delay(1);
         poll_events();
     }
 
+
+    bcm2835_pwm_set_data(0, 0);
+
     close_adventure_led();
+    send_telemetry();
     _client.close();
 }
 

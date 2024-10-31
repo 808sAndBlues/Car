@@ -17,7 +17,6 @@ void Client::send_data(std::uint8_t* buf, int length)
 
         else {
             remaining -= sent;
-            
             // TODO: Add logging statement for number of 
         }
     }

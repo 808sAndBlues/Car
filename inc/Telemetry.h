@@ -6,7 +6,7 @@
 #define TELEMETRY_TLR           0x1F
 
 const std::uint8_t GPIO_STATUS_LEN = 30;
-const std::uint8_t TIME_STATUS_LEN = 9;
+const std::uint8_t TIME_STATUS_LEN = 8;
 
 typedef enum : std::uint8_t 
 {
@@ -23,7 +23,7 @@ typedef struct
     std::uint8_t tlr = TELEMETRY_TLR; 
 } GPIOStatus;
 
-typedef struct
+typedef struct __attribute__((packed))
 {
     std::uint8_t header = TELEMETRY_HDR;
     std::uint8_t len = TIME_STATUS_LEN; 
