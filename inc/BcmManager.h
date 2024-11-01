@@ -15,6 +15,20 @@
 #define INIT_LED_GPIO_PIN       RPI_BPLUS_GPIO_J8_07
 #define ADVENTURE_LED_GPIO_PIN  RPI_BPLUS_GPIO_J8_40
 
+#define MOTOR_A_FWD_PIN       RPI_BPLUS_GPIO_J8_16
+#define MOTOR_A_REVERSE_PIN   RPI_BPLUS_GPIO_J8_18
+#define MOTOR_B_FWD_PIN       RPI_BPLUS_GPIO_J8_26
+#define MOTOR_B_REVERSE_PIN   RPI_BPLUS_GPIO_J8_24
+
+#define MOTOR_A_PWM_PIN       RPI_BPLUS_GPIO_J8_12
+#define MOTOR_B_PWM_PIN       RPI_BPLUS_GPIO_J8_32
+
+#define TARGET_PWM_FRQ_HZ    16000
+#define CLOCK_FREQ_HZ        19200000
+#define WRAP                 (CLOCK_FREQ_HZ/TARGET_PWM_FRQ_HZ) - 1 
+#define CLOCK_DIV            CLOCK_FREQ_HZ/(TARGET_PWM_FRQ_HZ * WRAP)
+
+
 const RPiGPIOPin GPIO_PINS[] = 
 {
     RPI_BPLUS_GPIO_J8_03, RPI_BPLUS_GPIO_J8_05, RPI_BPLUS_GPIO_J8_07,
@@ -73,7 +87,26 @@ class BcmManager
 
         void update_time_status();
 
+        void setup_motor_a();
+        void setup_motor_b();
+
+        void setup_motors();
+
+        void setup_pwm_pins();
+
+        void setup_pwm();
+
+        void shutdown_pwm();
+
+        void motor_a_forward();
+
+        void motor_b_forward();
+
+        std::uint16_t compute_wrap();
+
         void send_telemetry();
+
+        void drive_forward(std::uint16_t data);
 
     public:
         BcmManager(Logger& logger, KillFlag& kill_flag);

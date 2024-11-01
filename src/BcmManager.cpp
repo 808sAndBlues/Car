@@ -31,6 +31,10 @@ void BcmManager::init()
 
     set_init_led();
 
+    setup_pwm();
+    setup_motors();
+
+
 
     _logger.log_debug("BcmManager: Initialized");
 }
@@ -250,44 +254,117 @@ void BcmManager::clear_pin(RPiGPIOPin physical_pin)
     bcm2835_gpio_clr(physical_pin);
 }
 
-void BcmManager::main_loop()
+void BcmManager::setup_motors()
 {
-    close_init_led();
-    set_adventure_led();
-    int data = 0;
-    int direction = 1;
+    setup_motor_a();
+    setup_motor_b();
+}
 
+void BcmManager::setup_motor_a()
+{
     bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_16, BCM2835_GPIO_FSEL_OUTP);
     clear_pin(RPI_BPLUS_GPIO_J8_16);
 
     bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_18, BCM2835_GPIO_FSEL_OUTP);
     clear_pin(RPI_BPLUS_GPIO_J8_18);
+}
+
+void BcmManager::setup_motor_b()
+{
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_26, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(RPI_BPLUS_GPIO_J8_26);
+
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_24, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(RPI_BPLUS_GPIO_J8_24);
+}
+
+void BcmManager::motor_a_forward()
+{
+    set_pin(MOTOR_A_FWD_PIN);
+}
+
+void BcmManager::motor_b_forward()
+{
+    set_pin(MOTOR_B_FWD_PIN);
+}
+
+void BcmManager::setup_pwm_pins()
+{
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_12, BCM2835_GPIO_FSEL_ALT5);
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_32, BCM2835_GPIO_FSEL_ALT0);
+}
+
+void BcmManager::setup_pwm()
+{
+    setup_pwm_pins();
+
+    bcm2835_pwm_set_clock(CLOCK_DIV);
+    bcm2835_pwm_set_mode(0, 1, 1);
+    bcm2835_pwm_set_range(0, WRAP);
+}
+
+void BcmManager::drive_forward(std::uint16_t data)
+{
+    bcm2835_pwm_set_data(0, data);
+
+    motor_a_forward();
+    motor_b_forward();
+}
+
+void BcmManager::main_loop()
+{
+    close_init_led();
+    set_adventure_led();
+
+    drive_forward(WRAP/4);
+
+    /*
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_16, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(RPI_BPLUS_GPIO_J8_16);
+
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_18, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(RPI_BPLUS_GPIO_J8_18);
+
+
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_26, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(RPI_BPLUS_GPIO_J8_26);
+
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_24, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(RPI_BPLUS_GPIO_J8_24);
     
     bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_12, BCM2835_GPIO_FSEL_ALT5);
-
+    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_32, BCM2835_GPIO_FSEL_ALT0);
+    */
 
     //bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_33, BCM2835_GPIO_FSEL_OUTP);
-    bcm2835_pwm_set_clock(BCM2835_PWM_CLOCK_DIVIDER_16);
+    /*bcm2835_pwm_set_clock(BCM2835_PWM_CLOCK_DIVIDER_16);
     bcm2835_pwm_set_mode(0, 1, 1);
     bcm2835_pwm_set_range(0, 1024);
 
     bcm2835_pwm_set_data(0, 1023);
 
     set_pin(RPI_BPLUS_GPIO_J8_16);
+    set_pin(RPI_BPLUS_GPIO_J8_26);*/
 
     while (!_kill_flag.get_kill()) {
-        
-//        bcm2835_pwm_set_data(0, data);
-        bcm2835_delay(1);
         poll_events();
     }
 
-
-    bcm2835_pwm_set_data(0, 0);
+    shutdown_pwm();
 
     close_adventure_led();
     send_telemetry();
     _client.close();
+}
+
+void BcmManager::shutdown_pwm()
+{
+    bcm2835_pwm_set_data(0, 0);
+
+    clear_pin(MOTOR_A_FWD_PIN);
+    clear_pin(MOTOR_A_REVERSE_PIN);
+    clear_pin(MOTOR_B_FWD_PIN);
+    clear_pin(MOTOR_B_REVERSE_PIN);
 }
 
 void* bcm_manager_main_loop(void* obj)
