@@ -27,6 +27,7 @@
 #define CLOCK_FREQ_HZ        19200000
 #define WRAP                 (CLOCK_FREQ_HZ/TARGET_PWM_FRQ_HZ) - 1 
 #define CLOCK_DIV            CLOCK_FREQ_HZ/(TARGET_PWM_FRQ_HZ * WRAP)
+#define DUTY_RATIO           0.8
 
 
 const RPiGPIOPin GPIO_PINS[] = 
@@ -52,6 +53,7 @@ class BcmManager
 
         GPIOStatus _gpio_status;
         TimeStatus _time_status;
+        MotorStatus _motor_status;
 
         int _timerfd = 0;
 
@@ -88,6 +90,7 @@ class BcmManager
         void update_time_status();
 
         void setup_motor_a();
+
         void setup_motor_b();
 
         void setup_motors();
@@ -107,6 +110,22 @@ class BcmManager
         void send_telemetry();
 
         void drive_forward(std::uint16_t data);
+
+        std::uint8_t get_level(RPiGPIOPin pin);
+
+        void send_motor_status();
+
+        void serialize_motor_status(std::uint8_t* buf, size_t size);
+
+        void update_motor_status();
+
+        void update_motor_a_status();
+
+        void update_motor_a_state();
+
+        void update_motor_b_status();
+
+        void update_motor_b_state();
 
     public:
         BcmManager(Logger& logger, KillFlag& kill_flag);
