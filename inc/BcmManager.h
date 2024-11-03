@@ -55,6 +55,8 @@ class BcmManager
         TimeStatus _time_status;
         MotorStatus _motor_status;
 
+        std::uint8_t _recv_buffer[256] = {0};
+
         int _timerfd = 0;
 
         void setup_timerfd();

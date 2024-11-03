@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "Logger.h"
 #include "Epoll.h"
@@ -31,6 +32,8 @@ class Client
         void send_data(std::uint8_t *buf, int length);
 
         void close();
+
+        void recv_data(void* buffer, size_t length, struct sockaddr* addres);
 };
 
 #endif

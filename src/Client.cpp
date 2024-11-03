@@ -17,18 +17,54 @@ void Client::send_data(std::uint8_t* buf, int length)
 
         else {
             remaining -= sent;
-            // TODO: Add logging statement for number of 
+            // TODO: Add logging statement for number of bytes sent
         }
+    }
+}
+
+void Client::recv_data(void* buffer, size_t length, struct sockaddr* address)
+{
+    errno = 0;
+
+    unsigned int size = sizeof(address);
+    int received = recvfrom(_socket_fd, buffer, length, 0, address,
+                            &size);
+
+    if (received == -1 && errno != EAGAIN) {
+        std::cout << "Errno: " << errno << "\n";
+        _logger.log_debug("Client: Receive failure");
+        std::perror("recvfrom");
+        std::exit(-1);
+    }
+
+    else if (errno == EAGAIN) {
+        _logger.log_debug("Client: Did not receive data from CarServer");
+    }
+
+    else {
+        std::cout << "Client: Receive count = " << received << "\n";
     }
 }
 
 void Client::init()
 {
-    _socket_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    _socket_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP);
 
     if (_socket_fd == -1) {
         _logger.log_debug("Client: Failed to create socket");
         std::perror("socket");
+        std::exit(-1);
+    }
+
+    struct timeval timeout_value = {0};
+    timeout_value.tv_sec = 0.1;
+    timeout_value.tv_usec = 0;
+
+
+    if (setsockopt(_socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout_value,
+                   sizeof(timeout_value)) == -1) {
+        _logger.log_debug("Client: Failed to set receive timeout option");
+        std::perror("setsockopt");
         std::exit(-1);
     }
 

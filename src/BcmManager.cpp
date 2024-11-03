@@ -129,6 +129,14 @@ void BcmManager::timer_handler()
         send_gpio_status();
         send_time_status();
         send_motor_status();
+
+        struct sockaddr_in addr = {0};
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(PORT);
+        addr.sin_addr.s_addr = inet_addr(HOST);
+
+        _client.recv_data(_recv_buffer, sizeof(_recv_buffer),
+                          (struct sockaddr*) &addr);
     }
 }
 
