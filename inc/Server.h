@@ -25,7 +25,7 @@ class Server
 
         ~Server();
 
-        void recv_data(void* buffer, size_t length, struct sockaddr* addres);
+        int recv_data(void* buffer, size_t length, struct sockaddr* addres);
 };
 
 

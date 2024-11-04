@@ -136,6 +136,14 @@ class BcmManager
 
         void update_motor_b_state();
 
+        void drive_backward(std::uint16_t data);
+
+        void motor_a_backward();
+
+        void motor_b_backward();
+
+        void process_control_data(int received);
+
     public:
         BcmManager(Logger& logger, KillFlag& kill_flag);
 

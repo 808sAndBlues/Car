@@ -43,7 +43,7 @@ void Server::init()
     }
 }
 
-void Server::recv_data(void* buffer, size_t length, struct sockaddr* address)
+int Server::recv_data(void* buffer, size_t length, struct sockaddr* address)
 {
     errno = 0;
 
@@ -65,6 +65,8 @@ void Server::recv_data(void* buffer, size_t length, struct sockaddr* address)
     else {
         std::cout << "Server: Receive count = " << received << "\n";
     }
+
+    return received;
 }
 
 Server::~Server()

@@ -155,9 +155,12 @@ void BcmManager::control_timer_handler()
         std::exit(-1);
     }
     else {
+        std::memset(_recv_buffer, 0, sizeof(_recv_buffer));
         struct sockaddr_in cli_addr = {0};
-        _server.recv_data(_recv_buffer, sizeof(_recv_buffer),
+        int received = _server.recv_data(_recv_buffer, sizeof(_recv_buffer),
                           (struct sockaddr*) &cli_addr);
+
+        process_control_data(received);
     }
 }
 
@@ -429,12 +432,26 @@ void BcmManager::setup_motor_b()
 
 void BcmManager::motor_a_forward()
 {
+    clear_pin(MOTOR_A_REVERSE_PIN);
     set_pin(MOTOR_A_FWD_PIN);
 }
 
 void BcmManager::motor_b_forward()
 {
+    clear_pin(MOTOR_B_REVERSE_PIN);
     set_pin(MOTOR_B_FWD_PIN);
+}
+
+void BcmManager::motor_a_backward()
+{
+    clear_pin(MOTOR_A_FWD_PIN);
+    set_pin(MOTOR_A_REVERSE_PIN);
+}
+
+void BcmManager::motor_b_backward()
+{
+    clear_pin(MOTOR_B_FWD_PIN);
+    set_pin(MOTOR_B_REVERSE_PIN);
 }
 
 void BcmManager::setup_pwm_pins()
@@ -454,18 +471,53 @@ void BcmManager::setup_pwm()
 
 void BcmManager::drive_forward(std::uint16_t data)
 {
-    bcm2835_pwm_set_data(0, data);
-
     motor_a_forward();
     motor_b_forward();
+
+    bcm2835_pwm_set_data(0, data);
+}
+
+void BcmManager::drive_backward(std::uint16_t data)
+{
+    motor_a_backward();
+    motor_b_backward();
+
+    bcm2835_pwm_set_data(0, data);
+}
+
+
+void BcmManager::process_control_data(int received)
+{
+    if (received > 0) {
+        int control_val = 99;
+        std::memcpy(&control_val, _recv_buffer, received);
+
+        std::cout << "VLAUE: " << control_val << "\n";
+
+        switch (control_val) {
+            case 0:
+                std::cout << "Driving forward\n";
+                drive_forward(WRAP * DUTY_RATIO);
+                break;
+
+            case 2:
+                std::cout << "Driving Backward \n";
+                drive_backward(WRAP * DUTY_RATIO);
+            default:
+                shutdown_pwm();
+                break;
+        }
+    }
+
+    else {
+        shutdown_pwm();
+    }
 }
 
 void BcmManager::main_loop()
 {
     close_init_led();
     set_adventure_led();
-
-    drive_forward(WRAP * DUTY_RATIO);
 
     while (!_kill_flag.get_kill()) {
         poll_events();
