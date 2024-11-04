@@ -9,7 +9,7 @@
 #include "Logger.h"
 
 #define SERVER_HOST "0.0.0.0"
-#define SERVER_PORT 65001
+#define SERVER_PORT 65003
 
 class Server
 {

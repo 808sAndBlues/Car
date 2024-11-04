@@ -101,7 +101,7 @@ void BcmManager::setup_control_timerfd()
     timer_spec.it_value.tv_sec = 1;
     timer_spec.it_value.tv_nsec = 0;
     timer_spec.it_interval.tv_sec = 0;
-    timer_spec.it_interval.tv_nsec = 250000000;
+    timer_spec.it_interval.tv_nsec = 100000000;
 
     if (timerfd_settime(_control_timerfd, 0, &timer_spec, nullptr) == -1) {
         _logger.log_debug("BcmManager: Failed to setup control timerfd");
@@ -156,10 +156,8 @@ void BcmManager::control_timer_handler()
     }
     else {
         struct sockaddr_in cli_addr = {0};
-
         _server.recv_data(_recv_buffer, sizeof(_recv_buffer),
                           (struct sockaddr*) &cli_addr);
-
     }
 }
 
@@ -179,7 +177,6 @@ void BcmManager::tlm_timer_handler()
         send_gpio_status();
         send_time_status();
         send_motor_status();
-
     }
 }
 

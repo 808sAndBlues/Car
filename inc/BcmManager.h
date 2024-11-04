@@ -13,9 +13,6 @@
 #include "Telemetry.h"
 #include "Server.h"
 
-
-#define RECV_PORT               65001 
-
 #define INIT_LED_GPIO_PIN       RPI_BPLUS_GPIO_J8_07
 #define ADVENTURE_LED_GPIO_PIN  RPI_BPLUS_GPIO_J8_40
 

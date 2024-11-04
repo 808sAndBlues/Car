@@ -2,13 +2,14 @@
 
 void Server::init()
 {
-    _sock_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    _sock_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0);
 
     if (_sock_fd == -1) {
         _logger.log_debug("Server: Failed to create server socket");
         std::perror("socket");
         std::exit(-1);
     }
+
     int flag = 1;
 
     if (setsockopt(_sock_fd, SOL_SOCKET, SO_REUSEADDR, &flag,
@@ -18,9 +19,8 @@ void Server::init()
         std::exit(-1);
     }
 
-
     struct timeval timeout_value = {0};
-    timeout_value.tv_sec = 1;
+    timeout_value.tv_sec = 2;
     timeout_value.tv_usec = 0;
 
     if (setsockopt(_sock_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout_value,
@@ -32,7 +32,7 @@ void Server::init()
 
     struct sockaddr_in server_addr = {0};
     server_addr.sin_port = htons(SERVER_PORT);
-    server_addr.sin_addr.s_addr = inet_addr(SERVER_HOST);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_family = AF_INET;
 
     if (bind(_sock_fd, (struct sockaddr*) &server_addr,
@@ -45,16 +45,11 @@ void Server::init()
 
 void Server::recv_data(void* buffer, size_t length, struct sockaddr* address)
 {
-
-    std::cout << "Reached rcv\n";
     errno = 0;
 
     unsigned int size = sizeof(address);
     int received = recvfrom(_sock_fd, buffer, length, 0, address,
                             &size);
-
-    std::cout << "Received: " << received << "\n";
-    std::cout << "EAGAIN: " << errno << "\n";
 
     if (received == -1 && errno != EAGAIN) {
         std::cout << "Errno: " << errno << "\n";
@@ -71,7 +66,6 @@ void Server::recv_data(void* buffer, size_t length, struct sockaddr* address)
         std::cout << "Server: Receive count = " << received << "\n";
     }
 }
-
 
 Server::~Server()
 {
