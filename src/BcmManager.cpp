@@ -3,15 +3,18 @@
 BcmManager::BcmManager(Logger& logger,
                        KillFlag& kill_flag) : _logger(logger),
                                               _kill_flag(kill_flag),
-                                              _client(logger)
+                                              _client(logger),
+                                              _server(logger)
 {
     _client.init();
+    _server.init();
 }
 
 void BcmManager::setup_epoll()
 {
     _epoll.init();
-    setup_timerfd();
+    setup_tlm_timerfd();
+    setup_control_timerfd();
 }
 
 void BcmManager::init()
@@ -67,9 +70,9 @@ void BcmManager::close_adventure_led()
     _logger.flush_log();
 }
 
-void BcmManager::setup_timerfd()
+void BcmManager::setup_tlm_timerfd()
 {
-    _timerfd = timerfd_create(CLOCK_BOOTTIME, 0);
+    _tlm_timerfd = timerfd_create(CLOCK_BOOTTIME, 0);
 
     struct itimerspec timer_spec = {0};
     timer_spec.it_value.tv_sec = 1;
@@ -77,14 +80,37 @@ void BcmManager::setup_timerfd()
     timer_spec.it_interval.tv_sec = 1;
     timer_spec.it_interval.tv_nsec = 0;
 
-    if (timerfd_settime(_timerfd, 0, &timer_spec, nullptr) == -1) {
-        _logger.log_debug("BcmManager: Failed to setup timerfd");
+    if (timerfd_settime(_tlm_timerfd, 0, &timer_spec, nullptr) == -1) {
+        _logger.log_debug("BcmManager: Failed to setup tlm timerfd");
         std::perror("timerfd_settime");
         std::exit(-1);
     }
 
-    if (_epoll.add_fd(_timerfd) == -1) {
-        _logger.log_debug("BcmManager: Failed to add timerfd");
+    if (_epoll.add_fd(_tlm_timerfd) == -1) {
+        _logger.log_debug("BcmManager: Failed to add tlm timerfd");
+        std::perror("epoll_ctl");
+        std::exit(-1);
+    }
+}
+
+void BcmManager::setup_control_timerfd()
+{
+    _control_timerfd = timerfd_create(CLOCK_BOOTTIME, 0);
+
+    struct itimerspec timer_spec = {0};
+    timer_spec.it_value.tv_sec = 1;
+    timer_spec.it_value.tv_nsec = 0;
+    timer_spec.it_interval.tv_sec = 0;
+    timer_spec.it_interval.tv_nsec = 250000000;
+
+    if (timerfd_settime(_control_timerfd, 0, &timer_spec, nullptr) == -1) {
+        _logger.log_debug("BcmManager: Failed to setup control timerfd");
+        std::perror("timerfd_settime");
+        std::exit(-1);
+    }
+
+    if (_epoll.add_fd(_control_timerfd) == -1) {
+        _logger.log_debug("BcmManager: Failed to add tlm timerfd");
         std::perror("epoll_ctl");
         std::exit(-1);
     }
@@ -107,16 +133,40 @@ void BcmManager::evaluate_events(int fds)
     struct epoll_event* events = _epoll.get_events();
 
     for (int i = 0; i < fds; ++i) {
-        if (events[i].data.fd == _timerfd) {
-            timer_handler();
+        if (events[i].data.fd == _tlm_timerfd) {
+            tlm_timer_handler();
+        }
+
+        else if (events[i].data.fd == _control_timerfd) {
+            control_timer_handler();
         }
     }
 }
 
-void BcmManager::timer_handler()
+void BcmManager::control_timer_handler()
 {
     std::uint64_t num_expirations = 0;
-    int count = read(_timerfd, &num_expirations, sizeof(std::uint64_t));
+    int count = read(_control_timerfd,
+                     &num_expirations, sizeof(std::uint64_t));
+    
+    if (count == -1) {
+        _logger.log_debug("BcmManager: Failed to read from timerfd");
+        std::perror("read");
+        std::exit(-1);
+    }
+    else {
+        struct sockaddr_in cli_addr = {0};
+
+        _server.recv_data(_recv_buffer, sizeof(_recv_buffer),
+                          (struct sockaddr*) &cli_addr);
+
+    }
+}
+
+void BcmManager::tlm_timer_handler()
+{
+    std::uint64_t num_expirations = 0;
+    int count = read(_tlm_timerfd, &num_expirations, sizeof(std::uint64_t));
     
     if (count == -1) {
         _logger.log_debug("BcmManager: Failed to read from timerfd");
@@ -130,13 +180,6 @@ void BcmManager::timer_handler()
         send_time_status();
         send_motor_status();
 
-        struct sockaddr_in addr = {0};
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(PORT);
-        addr.sin_addr.s_addr = inet_addr(HOST);
-
-        _client.recv_data(_recv_buffer, sizeof(_recv_buffer),
-                          (struct sockaddr*) &addr);
     }
 }
 

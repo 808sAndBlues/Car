@@ -9,7 +9,8 @@ add_executable(Car
     src/Signal.cpp src/Queue.cpp
     src/Epoll.cpp
     src/BcmManager.cpp
-    src/Client.cpp)
+    src/Client.cpp
+    src/Server.cpp)
 
 enable_testing()
 add_subdirectory(test)

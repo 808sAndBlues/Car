@@ -11,23 +11,27 @@
 #include "Epoll.h"
 #include "Client.h"
 #include "Telemetry.h"
+#include "Server.h"
+
+
+#define RECV_PORT               65001 
 
 #define INIT_LED_GPIO_PIN       RPI_BPLUS_GPIO_J8_07
 #define ADVENTURE_LED_GPIO_PIN  RPI_BPLUS_GPIO_J8_40
 
-#define MOTOR_A_FWD_PIN       RPI_BPLUS_GPIO_J8_16
-#define MOTOR_A_REVERSE_PIN   RPI_BPLUS_GPIO_J8_18
-#define MOTOR_B_FWD_PIN       RPI_BPLUS_GPIO_J8_26
-#define MOTOR_B_REVERSE_PIN   RPI_BPLUS_GPIO_J8_24
+#define MOTOR_A_FWD_PIN         RPI_BPLUS_GPIO_J8_16
+#define MOTOR_A_REVERSE_PIN     RPI_BPLUS_GPIO_J8_18
+#define MOTOR_B_FWD_PIN         RPI_BPLUS_GPIO_J8_26
+#define MOTOR_B_REVERSE_PIN     RPI_BPLUS_GPIO_J8_24
 
-#define MOTOR_A_PWM_PIN       RPI_BPLUS_GPIO_J8_12
-#define MOTOR_B_PWM_PIN       RPI_BPLUS_GPIO_J8_32
+#define MOTOR_A_PWM_PIN         RPI_BPLUS_GPIO_J8_12
+#define MOTOR_B_PWM_PIN         RPI_BPLUS_GPIO_J8_32
 
-#define TARGET_PWM_FRQ_HZ    16000
-#define CLOCK_FREQ_HZ        19200000
-#define WRAP                 (CLOCK_FREQ_HZ/TARGET_PWM_FRQ_HZ) - 1 
-#define CLOCK_DIV            CLOCK_FREQ_HZ/(TARGET_PWM_FRQ_HZ * WRAP)
-#define DUTY_RATIO           0.8
+#define TARGET_PWM_FRQ_HZ       16000
+#define CLOCK_FREQ_HZ           19200000
+#define WRAP                    (CLOCK_FREQ_HZ/TARGET_PWM_FRQ_HZ) - 1 
+#define CLOCK_DIV               CLOCK_FREQ_HZ/(TARGET_PWM_FRQ_HZ * WRAP)
+#define DUTY_RATIO              0.8
 
 
 const RPiGPIOPin GPIO_PINS[] = 
@@ -50,6 +54,7 @@ class BcmManager
         KillFlag& _kill_flag;
         Epoll _epoll;
         Client _client;
+        Server _server;
 
         GPIOStatus _gpio_status;
         TimeStatus _time_status;
@@ -57,9 +62,14 @@ class BcmManager
 
         std::uint8_t _recv_buffer[256] = {0};
 
-        int _timerfd = 0;
+        int _tlm_timerfd = 0;
+        int _control_timerfd = 0;
 
-        void setup_timerfd();
+        void setup_tlm_timerfd();
+        
+        void setup_control_timerfd();
+
+        void control_timer_handler();
 
         void set_init_led();
 
@@ -77,7 +87,7 @@ class BcmManager
 
         void setup_epoll();
 
-        void timer_handler();
+        void tlm_timer_handler();
 
         void send_gpio_status();
 

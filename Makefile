@@ -296,6 +296,30 @@ src/Queue.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Queue.cpp.s
 .PHONY : src/Queue.cpp.s
 
+src/Server.o: src/Server.cpp.o
+.PHONY : src/Server.o
+
+# target to build an object file
+src/Server.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Server.cpp.o
+.PHONY : src/Server.cpp.o
+
+src/Server.i: src/Server.cpp.i
+.PHONY : src/Server.i
+
+# target to preprocess a source file
+src/Server.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Server.cpp.i
+.PHONY : src/Server.cpp.i
+
+src/Server.s: src/Server.cpp.s
+.PHONY : src/Server.s
+
+# target to generate assembly for a file
+src/Server.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Server.cpp.s
+.PHONY : src/Server.cpp.s
+
 src/Signal.o: src/Signal.cpp.o
 .PHONY : src/Signal.o
 
@@ -373,6 +397,9 @@ help:
 	@echo "... src/Queue.o"
 	@echo "... src/Queue.i"
 	@echo "... src/Queue.s"
+	@echo "... src/Server.o"
+	@echo "... src/Server.i"
+	@echo "... src/Server.s"
 	@echo "... src/Signal.o"
 	@echo "... src/Signal.i"
 	@echo "... src/Signal.s"
