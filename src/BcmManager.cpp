@@ -414,20 +414,20 @@ void BcmManager::update_motor_status()
 
 void BcmManager::setup_motor_a()
 {
-    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_16, BCM2835_GPIO_FSEL_OUTP);
-    clear_pin(RPI_BPLUS_GPIO_J8_16);
+    bcm2835_gpio_fsel(MOTOR_A_FWD_PIN, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(MOTOR_A_FWD_PIN);
 
-    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_18, BCM2835_GPIO_FSEL_OUTP);
-    clear_pin(RPI_BPLUS_GPIO_J8_18);
+    bcm2835_gpio_fsel(MOTOR_A_REVERSE_PIN, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(MOTOR_A_REVERSE_PIN);
 }
 
 void BcmManager::setup_motor_b()
 {
-    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_26, BCM2835_GPIO_FSEL_OUTP);
-    clear_pin(RPI_BPLUS_GPIO_J8_26);
+    bcm2835_gpio_fsel(MOTOR_B_FWD_PIN, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(MOTOR_B_FWD_PIN);
 
-    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_24, BCM2835_GPIO_FSEL_OUTP);
-    clear_pin(RPI_BPLUS_GPIO_J8_24);
+    bcm2835_gpio_fsel(MOTOR_B_REVERSE_PIN, BCM2835_GPIO_FSEL_OUTP);
+    clear_pin(MOTOR_B_REVERSE_PIN);
 }
 
 void BcmManager::motor_a_forward()
@@ -446,18 +446,24 @@ void BcmManager::motor_a_backward()
 {
     clear_pin(MOTOR_A_FWD_PIN);
     set_pin(MOTOR_A_REVERSE_PIN);
+    std::cout << (int) MOTOR_A_REVERSE_PIN << "\n";
+
+    std::cout << "MOTOR A REVERSE LEVEL: " << (int) get_level(MOTOR_A_REVERSE_PIN) << "\n";
 }
 
 void BcmManager::motor_b_backward()
 {
     clear_pin(MOTOR_B_FWD_PIN);
     set_pin(MOTOR_B_REVERSE_PIN);
+    std::cout << (int) MOTOR_B_REVERSE_PIN << "\n";
+
+    std::cout << "MOTOR B REVERSE LEVEL: " << (int) get_level(MOTOR_B_REVERSE_PIN) << "\n";
 }
 
 void BcmManager::setup_pwm_pins()
 {
-    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_12, BCM2835_GPIO_FSEL_ALT5);
-    bcm2835_gpio_fsel(RPI_BPLUS_GPIO_J8_32, BCM2835_GPIO_FSEL_ALT0);
+    bcm2835_gpio_fsel(MOTOR_A_PWM_PIN, BCM2835_GPIO_FSEL_ALT5);
+    bcm2835_gpio_fsel(MOTOR_B_PWM_PIN, BCM2835_GPIO_FSEL_ALT0);
 }
 
 void BcmManager::setup_pwm()
@@ -503,6 +509,7 @@ void BcmManager::process_control_data(int received)
             case 2:
                 std::cout << "Driving Backward \n";
                 drive_backward(WRAP * DUTY_RATIO);
+                break;
             default:
                 shutdown_pwm();
                 break;
@@ -518,6 +525,7 @@ void BcmManager::main_loop()
 {
     close_init_led();
     set_adventure_led();
+
 
     while (!_kill_flag.get_kill()) {
         poll_events();
@@ -547,43 +555,3 @@ void* bcm_manager_main_loop(void* obj)
     return nullptr;
 }
 
-void BcmManager::step(int val)
-{
-    switch(val)
-    {
-        case 0:
-            set_pin(RPI_BPLUS_GPIO_J8_08);
-            set_pin(RPI_BPLUS_GPIO_J8_10);
-            clear_pin(RPI_BPLUS_GPIO_J8_12);
-            clear_pin(RPI_BPLUS_GPIO_J8_16);
-            break;
-        case 1:
-            clear_pin(RPI_BPLUS_GPIO_J8_08);
-            set_pin(RPI_BPLUS_GPIO_J8_10);
-            set_pin(RPI_BPLUS_GPIO_J8_12);
-            clear_pin(RPI_BPLUS_GPIO_J8_16);
-            break;
-
-        case 2:
-            clear_pin(RPI_BPLUS_GPIO_J8_08);
-            clear_pin(RPI_BPLUS_GPIO_J8_10);
-            set_pin(RPI_BPLUS_GPIO_J8_12);
-            set_pin(RPI_BPLUS_GPIO_J8_16);
-            break;
-
-        case 3:
-            set_pin(RPI_BPLUS_GPIO_J8_08);
-            clear_pin(RPI_BPLUS_GPIO_J8_10);
-            clear_pin(RPI_BPLUS_GPIO_J8_12);
-            set_pin(RPI_BPLUS_GPIO_J8_16);
-            break;
-
-        default:
-            clear_pin(RPI_BPLUS_GPIO_J8_08);
-            clear_pin(RPI_BPLUS_GPIO_J8_10);
-            clear_pin(RPI_BPLUS_GPIO_J8_12);
-            clear_pin(RPI_BPLUS_GPIO_J8_16);
-
-            break;
-    }
-}
