@@ -1,13 +1,9 @@
 #include "Epoll.h"
 
-Epoll::Epoll()
-{
-    // TODO: Fill if necessary  
-}
-
 int Epoll::init()
 {
     _epoll_fd = epoll_create(MAX_EPOLL_EVENTS);
+
     return _epoll_fd;
 }
 

@@ -48,7 +48,7 @@ int Server::recv_data(void* buffer, size_t length, struct sockaddr* address)
     errno = 0;
 
     int received = recvfrom(_sock_fd, buffer, length, 0, address,
-                            &SIZEOF_ADDRESS);
+                            &_address_holder);
 
     if (received == -1 && errno != EAGAIN) {
         _logger.log_debug("Server: Receive failure");

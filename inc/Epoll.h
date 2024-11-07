@@ -4,6 +4,7 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 #include <iostream>
+
 #define MAX_EPOLL_EVENTS 255
 
 class Epoll 
@@ -15,7 +16,8 @@ class Epoll
         struct epoll_event _events[MAX_EPOLL_EVENTS];
 
     public:
-        Epoll();
+        Epoll() {};
+
         ~Epoll();
 
         // TODO: Change return value to enum status code
@@ -28,5 +30,5 @@ class Epoll
         struct epoll_event* get_events();
 };
 
-
 #endif
+

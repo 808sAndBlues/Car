@@ -13,7 +13,7 @@
 
 #define TIMEOUT_RECV 2
 
-const int SIZEOF_ADDRESS = sizeof(struct sockaddr*);
+const unsigned int SIZEOF_ADDRESS = sizeof(struct sockaddr*);
 
 class Server
 {
@@ -21,6 +21,8 @@ class Server
         Logger& _logger;
 
         int _sock_fd = 0;
+
+        unsigned int _address_holder = SIZEOF_ADDRESS;
 
     public:
         Server(Logger& logger): _logger(logger) {}
