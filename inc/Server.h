@@ -8,8 +8,12 @@
 
 #include "Logger.h"
 
-#define SERVER_HOST "0.0.0.0"
-#define SERVER_PORT 65003
+#define SERVER_HOST  "0.0.0.0"
+#define SERVER_PORT  65003
+
+#define TIMEOUT_RECV 2
+
+const int SIZEOF_ADDRESS = sizeof(struct sockaddr*);
 
 class Server
 {

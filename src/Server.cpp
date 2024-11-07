@@ -20,7 +20,7 @@ void Server::init()
     }
 
     struct timeval timeout_value = {0};
-    timeout_value.tv_sec = 2;
+    timeout_value.tv_sec = TIMEOUT_RECV;
     timeout_value.tv_usec = 0;
 
     if (setsockopt(_sock_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout_value,
@@ -47,12 +47,10 @@ int Server::recv_data(void* buffer, size_t length, struct sockaddr* address)
 {
     errno = 0;
 
-    unsigned int size = sizeof(address);
     int received = recvfrom(_sock_fd, buffer, length, 0, address,
-                            &size);
+                            &SIZEOF_ADDRESS);
 
     if (received == -1 && errno != EAGAIN) {
-        std::cout << "Errno: " << errno << "\n";
         _logger.log_debug("Server: Receive failure");
         std::perror("recvfrom");
         std::exit(-1);
@@ -71,6 +69,7 @@ int Server::recv_data(void* buffer, size_t length, struct sockaddr* address)
 
 Server::~Server()
 {
+    // TODO: Check return value
     ::close(_sock_fd);
 }
 
