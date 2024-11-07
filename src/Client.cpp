@@ -57,7 +57,7 @@ void Client::init()
     }
 
     struct timeval timeout_value = {0};
-    timeout_value.tv_sec = 0.1;
+    timeout_value.tv_sec = TIMEOUT_VAL;
     timeout_value.tv_usec = 0;
 
 
@@ -84,6 +84,7 @@ void Client::init()
 
 void Client::close()
 {
+    // TODO: Check return value
     ::close(_socket_fd); 
 }
 

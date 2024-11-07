@@ -11,8 +11,10 @@
 #include "Epoll.h"
 #include "KillFlag.h"
 
-#define PORT    65000
-#define HOST    "10.0.0.5"
+#define PORT        65000
+#define HOST        "10.0.0.5"
+
+#define TIMEOUT_VAL 0.1f
 
 class Client
 {
