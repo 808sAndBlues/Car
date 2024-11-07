@@ -39,24 +39,10 @@ void BcmManager::init()
     _logger.log_debug("BcmManager: Initialized");
 }
 
-void BcmManager::set_init_led()
-{
-    //TODO: Set GPIO to output
-    bcm2835_gpio_fsel(INIT_LED_GPIO_PIN, BCM2835_GPIO_FSEL_OUTP);
-    set_pin(INIT_LED_GPIO_PIN);
-
-    _logger.log_debug("BcmManager: Init LED has been turned on");
-}
-
-void BcmManager::close_init_led()
-{
-    clear_pin(INIT_LED_GPIO_PIN);
-    _logger.log_debug("BcmManager: Init LED has been turned off");
-}
-
 void BcmManager::set_adventure_led()
 {
     bcm2835_gpio_fsel(ADVENTURE_LED_GPIO_PIN, BCM2835_GPIO_FSEL_OUTP);
+
     set_pin(ADVENTURE_LED_GPIO_PIN);
 
     _logger.log_debug("BcmManager: Adventure LED has been lit");
@@ -65,6 +51,7 @@ void BcmManager::set_adventure_led()
 void BcmManager::close_adventure_led()
 {
     clear_pin(ADVENTURE_LED_GPIO_PIN);
+
     _logger.log_debug("BcmManager: Adventure LED has been turned off");
 
     _logger.flush_log();
@@ -101,7 +88,7 @@ void BcmManager::setup_control_timerfd()
     timer_spec.it_value.tv_sec = 1;
     timer_spec.it_value.tv_nsec = 0;
     timer_spec.it_interval.tv_sec = 0;
-    timer_spec.it_interval.tv_nsec = 100000000;
+    timer_spec.it_interval.tv_nsec = CONTROL_POLL_NS;
 
     if (timerfd_settime(_control_timerfd, 0, &timer_spec, nullptr) == -1) {
         _logger.log_debug("BcmManager: Failed to setup control timerfd");
@@ -120,6 +107,7 @@ void BcmManager::send_telemetry()
 {
     send_gpio_status();
     send_time_status();
+    send_motor_status();
 }
 
 void BcmManager::poll_events()
@@ -156,6 +144,7 @@ void BcmManager::control_timer_handler()
     }
     else {
         std::memset(_recv_buffer, 0, sizeof(_recv_buffer));
+
         struct sockaddr_in cli_addr = {0};
         int received = _server.recv_data(_recv_buffer, sizeof(_recv_buffer),
                           (struct sockaddr*) &cli_addr);
@@ -176,10 +165,7 @@ void BcmManager::tlm_timer_handler()
     }
 
     else {
-        // TODO: Update this to be a "general" telemetry send function
-        send_gpio_status();
-        send_time_status();
-        send_motor_status();
+        send_telemetry();
     }
 }
 
@@ -265,7 +251,6 @@ void BcmManager::update_time_status()
     _time_status.tlr = TELEMETRY_TLR;
 
     _time_status.t_seconds += 1;
-    
 }
 
 void BcmManager::send_gpio_status()
@@ -325,11 +310,6 @@ BcmManager::~BcmManager()
     bcm2835_close();
 }
 
-void BcmManager::set_io_state(RPiGPIOPin pin, bcm2835FunctionSelect mode)
-{
-    bcm2835_gpio_fsel(pin, mode);
-}
-
 void BcmManager::set_pin(RPiGPIOPin physical_pin)
 {
     bcm2835_gpio_set(physical_pin);
@@ -351,15 +331,10 @@ std::uint8_t BcmManager::get_level(RPiGPIOPin pin)
     return bcm2835_gpio_lev(pin);
 }
 
-void BcmManager::update_motor_a_status()
+void BcmManager::update_motor_a_state()
 {
     _motor_status.motor_a_on = get_level(MOTOR_A_PWM_PIN);
 
-    update_motor_a_state();
-}
-
-void BcmManager::update_motor_a_state()
-{
     if (_motor_status.motor_a_on) {
         if (get_level(MOTOR_A_FWD_PIN)) {
             _motor_status.motor_a_state = FORWARD;
@@ -379,14 +354,10 @@ void BcmManager::update_motor_a_state()
     }
 }
 
-void BcmManager::update_motor_b_status()
-{
-    _motor_status.motor_b_on = get_level(MOTOR_B_PWM_PIN);
-    update_motor_b_state();
-}
-
 void BcmManager::update_motor_b_state()
 {
+    _motor_status.motor_b_on = get_level(MOTOR_B_PWM_PIN);
+
     if (_motor_status.motor_b_on) {
         if (get_level(MOTOR_B_FWD_PIN)) {
             _motor_status.motor_b_state = FORWARD;
@@ -408,8 +379,8 @@ void BcmManager::update_motor_b_state()
 
 void BcmManager::update_motor_status()
 {
-    update_motor_a_status();
-    update_motor_b_status();
+    update_motor_a_state();
+    update_motor_b_state();
 }
 
 void BcmManager::setup_motor_a()
@@ -446,18 +417,16 @@ void BcmManager::motor_a_backward()
 {
     clear_pin(MOTOR_A_FWD_PIN);
     set_pin(MOTOR_A_REVERSE_PIN);
-    std::cout << (int) MOTOR_A_REVERSE_PIN << "\n";
 
-    std::cout << "MOTOR A REVERSE LEVEL: " << (int) get_level(MOTOR_A_REVERSE_PIN) << "\n";
+    // TODO: Add logging statement
 }
 
 void BcmManager::motor_b_backward()
 {
     clear_pin(MOTOR_B_FWD_PIN);
     set_pin(MOTOR_B_REVERSE_PIN);
-    std::cout << (int) MOTOR_B_REVERSE_PIN << "\n";
 
-    std::cout << "MOTOR B REVERSE LEVEL: " << (int) get_level(MOTOR_B_REVERSE_PIN) << "\n";
+    // TODO: Add logging statement
 }
 
 void BcmManager::setup_pwm_pins()
@@ -471,8 +440,8 @@ void BcmManager::setup_pwm()
     setup_pwm_pins();
 
     bcm2835_pwm_set_clock(CLOCK_DIV);
-    bcm2835_pwm_set_mode(0, 1, 1);
-    bcm2835_pwm_set_range(0, WRAP);
+    bcm2835_pwm_set_mode(PWM_CHANNEL_0, 1, 1);
+    bcm2835_pwm_set_range(PWM_CHANNEL_0, WRAP);
 }
 
 void BcmManager::drive_forward(std::uint16_t data)
@@ -480,7 +449,7 @@ void BcmManager::drive_forward(std::uint16_t data)
     motor_a_forward();
     motor_b_forward();
 
-    bcm2835_pwm_set_data(0, data);
+    bcm2835_pwm_set_data(PWM_CHANNEL_0, data);
 }
 
 void BcmManager::drive_backward(std::uint16_t data)
@@ -488,26 +457,24 @@ void BcmManager::drive_backward(std::uint16_t data)
     motor_a_backward();
     motor_b_backward();
 
-    bcm2835_pwm_set_data(0, data);
+    bcm2835_pwm_set_data(PWM_CHANNEL_0, data);
 }
-
 
 void BcmManager::process_control_data(int received)
 {
+    _received_ctl_val = DFLT_CTL_VAL;
+
     if (received > 0) {
-        int control_val = 99;
-        std::memcpy(&control_val, _recv_buffer, received);
+        std::memcpy(&_received_ctl_val, _recv_buffer, received);
 
-        std::cout << "VLAUE: " << control_val << "\n";
-
-        switch (control_val) {
-            case 0:
-                std::cout << "Driving forward\n";
+        switch (_received_ctl_val) {
+            case FORWARD_CTL_VAL:
+                // TODO: Add logging statement
                 drive_forward(WRAP * DUTY_RATIO);
                 break;
 
-            case 2:
-                std::cout << "Driving Backward \n";
+            case REVERSE_CTL_VAL:
+                // TODO: Add logging statement
                 drive_backward(WRAP * DUTY_RATIO);
                 break;
             default:
@@ -523,24 +490,26 @@ void BcmManager::process_control_data(int received)
 
 void BcmManager::main_loop()
 {
-    close_init_led();
     set_adventure_led();
-
 
     while (!_kill_flag.get_kill()) {
         poll_events();
     }
+}
 
+void BcmManager::shutdown_sequence()
+{
     shutdown_pwm();
-
     close_adventure_led();
     send_telemetry();
     _client.close();
+
+    _logger.log_debug("BcmManager: Shutdown complete!");
 }
 
 void BcmManager::shutdown_pwm()
 {
-    bcm2835_pwm_set_data(0, 0);
+    bcm2835_pwm_set_data(PWM_CHANNEL_0, 0);
 
     clear_pin(MOTOR_A_FWD_PIN);
     clear_pin(MOTOR_A_REVERSE_PIN);
