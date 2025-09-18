@@ -65,6 +65,16 @@ CMAKE_BINARY_DIR = /home/ojeet/projects/Car
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
+
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -129,6 +139,91 @@ Car/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/build
 .PHONY : Car/fast
 
+#=============================================================================
+# Target rules for targets named ut
+
+# Build rule for target.
+ut: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ut
+.PHONY : ut
+
+# fast build rule for target.
+ut/fast:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/ut.dir/build.make test/CMakeFiles/ut.dir/build
+.PHONY : ut/fast
+
+src/BcmManager.o: src/BcmManager.cpp.o
+.PHONY : src/BcmManager.o
+
+# target to build an object file
+src/BcmManager.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/BcmManager.cpp.o
+.PHONY : src/BcmManager.cpp.o
+
+src/BcmManager.i: src/BcmManager.cpp.i
+.PHONY : src/BcmManager.i
+
+# target to preprocess a source file
+src/BcmManager.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/BcmManager.cpp.i
+.PHONY : src/BcmManager.cpp.i
+
+src/BcmManager.s: src/BcmManager.cpp.s
+.PHONY : src/BcmManager.s
+
+# target to generate assembly for a file
+src/BcmManager.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/BcmManager.cpp.s
+.PHONY : src/BcmManager.cpp.s
+
+src/Client.o: src/Client.cpp.o
+.PHONY : src/Client.o
+
+# target to build an object file
+src/Client.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Client.cpp.o
+.PHONY : src/Client.cpp.o
+
+src/Client.i: src/Client.cpp.i
+.PHONY : src/Client.i
+
+# target to preprocess a source file
+src/Client.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Client.cpp.i
+.PHONY : src/Client.cpp.i
+
+src/Client.s: src/Client.cpp.s
+.PHONY : src/Client.s
+
+# target to generate assembly for a file
+src/Client.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Client.cpp.s
+.PHONY : src/Client.cpp.s
+
+src/Epoll.o: src/Epoll.cpp.o
+.PHONY : src/Epoll.o
+
+# target to build an object file
+src/Epoll.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Epoll.cpp.o
+.PHONY : src/Epoll.cpp.o
+
+src/Epoll.i: src/Epoll.cpp.i
+.PHONY : src/Epoll.i
+
+# target to preprocess a source file
+src/Epoll.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Epoll.cpp.i
+.PHONY : src/Epoll.cpp.i
+
+src/Epoll.s: src/Epoll.cpp.s
+.PHONY : src/Epoll.s
+
+# target to generate assembly for a file
+src/Epoll.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Epoll.cpp.s
+.PHONY : src/Epoll.cpp.s
+
 src/KillFlag.o: src/KillFlag.cpp.o
 .PHONY : src/KillFlag.o
 
@@ -176,6 +271,54 @@ src/Logger.s: src/Logger.cpp.s
 src/Logger.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Logger.cpp.s
 .PHONY : src/Logger.cpp.s
+
+src/Queue.o: src/Queue.cpp.o
+.PHONY : src/Queue.o
+
+# target to build an object file
+src/Queue.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Queue.cpp.o
+.PHONY : src/Queue.cpp.o
+
+src/Queue.i: src/Queue.cpp.i
+.PHONY : src/Queue.i
+
+# target to preprocess a source file
+src/Queue.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Queue.cpp.i
+.PHONY : src/Queue.cpp.i
+
+src/Queue.s: src/Queue.cpp.s
+.PHONY : src/Queue.s
+
+# target to generate assembly for a file
+src/Queue.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Queue.cpp.s
+.PHONY : src/Queue.cpp.s
+
+src/Server.o: src/Server.cpp.o
+.PHONY : src/Server.o
+
+# target to build an object file
+src/Server.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Server.cpp.o
+.PHONY : src/Server.cpp.o
+
+src/Server.i: src/Server.cpp.i
+.PHONY : src/Server.i
+
+# target to preprocess a source file
+src/Server.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Server.cpp.i
+.PHONY : src/Server.cpp.i
+
+src/Server.s: src/Server.cpp.s
+.PHONY : src/Server.s
+
+# target to generate assembly for a file
+src/Server.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Car.dir/build.make CMakeFiles/Car.dir/src/Server.cpp.s
+.PHONY : src/Server.cpp.s
 
 src/Signal.o: src/Signal.cpp.o
 .PHONY : src/Signal.o
@@ -233,13 +376,30 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... Car"
+	@echo "... ut"
+	@echo "... src/BcmManager.o"
+	@echo "... src/BcmManager.i"
+	@echo "... src/BcmManager.s"
+	@echo "... src/Client.o"
+	@echo "... src/Client.i"
+	@echo "... src/Client.s"
+	@echo "... src/Epoll.o"
+	@echo "... src/Epoll.i"
+	@echo "... src/Epoll.s"
 	@echo "... src/KillFlag.o"
 	@echo "... src/KillFlag.i"
 	@echo "... src/KillFlag.s"
 	@echo "... src/Logger.o"
 	@echo "... src/Logger.i"
 	@echo "... src/Logger.s"
+	@echo "... src/Queue.o"
+	@echo "... src/Queue.i"
+	@echo "... src/Queue.s"
+	@echo "... src/Server.o"
+	@echo "... src/Server.i"
+	@echo "... src/Server.s"
 	@echo "... src/Signal.o"
 	@echo "... src/Signal.i"
 	@echo "... src/Signal.s"
